@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, useRef, useState } from "react";
+import NextImage from "next/image";
 import {
   downloadCanvas,
   EditorSettings,
@@ -19,10 +20,10 @@ const templates: Array<{ id: TemplateId; name: string; caption: string; mark: st
 ];
 
 const adjustmentTools = [
-  { id: "crop", label: "切り抜き", icon: "⌗" },
-  { id: "light", label: "明るさ", icon: "☼" },
-  { id: "background", label: "背景", icon: "▧" },
-  { id: "adjust", label: "調整", icon: "☷" },
+  { id: "crop", label: "切り抜き", image: "/assets/tool-crop.png" },
+  { id: "light", label: "明るさ", image: "/assets/tool-light.png" },
+  { id: "background", label: "背景", image: "/assets/tool-background.png" },
+  { id: "adjust", label: "調整", image: "/assets/tool-adjust.png" },
 ] as const;
 
 const initialSettings: EditorSettings = {
@@ -161,7 +162,7 @@ export function LetterMaker() {
                   className={showAdjustments ? "active" : ""}
                   onClick={() => setShowAdjustments(true)}
                 >
-                  <b>{tool.icon}</b>
+                  <NextImage src={tool.image} alt="" width={64} height={64} />
                   <span>{tool.label}</span>
                 </button>
               ))}
@@ -234,8 +235,9 @@ export function LetterMaker() {
       </div>
 
       <footer>
-        <LeafMark />
+        <NextImage className="footer-flower footer-flower-left" src="/assets/footer-left.png" alt="" width={320} height={180} />
         <p><strong>えから便り</strong> 手書きの絵を、日々の便りに。</p>
+        <NextImage className="footer-flower footer-flower-right" src="/assets/footer-right.png" alt="" width={320} height={180} />
       </footer>
     </main>
   );

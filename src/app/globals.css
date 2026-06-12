@@ -131,7 +131,8 @@ button { color: inherit; }
 .adjust-tool-grid button { min-height: 58px; display: grid; place-items: center; gap: 2px; padding: 7px 2px; border: 0; border-right: 1px solid var(--line); background: #fffdfa; cursor: pointer; }
 .adjust-tool-grid button:last-child { border-right: 0; }
 .adjust-tool-grid button:hover, .adjust-tool-grid button.active { background: #f5f7f1; color: var(--green); }
-.adjust-tool-grid b { font-family: serif; font-size: 22px; font-weight: 400; line-height: 1; }
+.adjust-tool-grid img { width: 42px; height: 34px; object-fit: contain; transition: transform .2s ease; }
+.adjust-tool-grid button:hover img { transform: translateY(-2px) rotate(-2deg); }
 .adjust-tool-grid span { font-size: 9px; }
 
 .adjustments { margin-top: 12px; padding-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; border-top: 1px solid var(--line); }
@@ -199,10 +200,11 @@ button { color: inherit; }
 .primary-button:hover { background: #5d735b; }
 .secondary-button { padding: 11px 12px; border: 1px solid #bdad98; background: transparent; color: #877662; }
 
-footer { min-height: 100px; padding: 24px; display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--muted); border-top: 1px solid rgba(153,134,108,.2); font-family: "Yu Mincho", serif; font-size: 11px; }
-footer svg { width: 28px; height: 34px; }
+footer { min-height: 150px; padding: 20px 24px 0; display: flex; justify-content: center; align-items: end; gap: 0; overflow: hidden; color: var(--muted); border-top: 1px solid rgba(153,134,108,.2); font-family: "Yu Mincho", serif; font-size: 11px; }
+footer p { align-self: center; position: relative; z-index: 1; margin: 0 -28px 24px; padding: 10px 30px; border-radius: 999px; background: rgba(255,253,248,.82); white-space: nowrap; }
+.footer-flower { width: min(30vw, 300px); height: auto; object-fit: contain; }
+.footer-flower-right { transform: translateX(-4px); }
 footer strong { color: var(--green); letter-spacing: .1em; }
-footer::before, footer::after { content: "❀"; color: #d9998c; font-size: 16px; }
 
 @media (max-width: 860px) {
   .hero { align-items: start; flex-direction: column; padding-top: 36px; }
@@ -233,4 +235,7 @@ footer::before, footer::after { content: "❀"; color: #d9998c; font-size: 16px;
   .template strong { font-size: 8px; }
   .adjustments { grid-template-columns: 1fr; }
   .rotation-row { grid-column: auto; }
+  footer { min-height: 110px; padding: 14px 4px 0; }
+  footer p { margin: 0 -42px 20px; padding: 7px 15px; font-size: 9px; }
+  .footer-flower { width: 42vw; }
 }
