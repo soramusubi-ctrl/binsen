@@ -1,0 +1,366 @@
+export type TemplateId = "watermark" | "frame" | "scatter" | "card";
+
+export type EditorSettings = {
+  brightness: number;
+  cleanup: number;
+  rotation: number;
+  zoom: number;
+  offsetX: number;
+  offsetY: number;
+  showLines: boolean;
+  message: string;
+};
+
+export const PIECE_WIDTH = 1240;
+export const PIECE_HEIGHT = 1754;
+export const A4_WIDTH = 2480;
+export const A4_HEIGHT = 3508;
+
+const ink = "#73675a";
+const paleInk = "#b7aa98";
+const paper = "#fffdf7";
+const green = "#788d76";
+
+function roundedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+) {
+  ctx.beginPath();
+  ctx.roundRect(x, y, width, height, radius);
+}
+
+function drawImageCover(
+  ctx: CanvasRenderingContext2D,
+  image: CanvasImageSource,
+  imageWidth: number,
+  imageHeight: number,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  settings: EditorSettings,
+) {
+  const rotated = Math.abs(settings.rotation % 180) === 90;
+  const sourceW = rotated ? imageHeight : imageWidth;
+  const sourceH = rotated ? imageWidth : imageHeight;
+  const scale = Math.max(width / sourceW, height / sourceH) * settings.zoom;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x, y, width, height);
+  ctx.clip();
+  ctx.translate(
+    x + width / 2 + settings.offsetX * width * 0.28,
+    y + height / 2 + settings.offsetY * height * 0.28,
+  );
+  ctx.rotate((settings.rotation * Math.PI) / 180);
+  ctx.filter = `brightness(${settings.brightness}%) contrast(${100 + settings.cleanup * 0.35}%) saturate(${100 - settings.cleanup * 0.18}%)`;
+  ctx.drawImage(
+    image,
+    (-imageWidth * scale) / 2,
+    (-imageHeight * scale) / 2,
+    imageWidth * scale,
+    imageHeight * scale,
+  );
+  ctx.restore();
+}
+
+function drawSampleArt(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  alpha = 1,
+) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  const cx = x + width * 0.52;
+  const cy = y + height * 0.46;
+  const unit = Math.min(width, height);
+
+  const blooms = [
+    { dx: -0.19, dy: -0.08, color: "#dca098", size: 0.19 },
+    { dx: 0.05, dy: -0.2, color: "#e7b9a5", size: 0.16 },
+    { dx: 0.18, dy: 0.02, color: "#d7a7b3", size: 0.17 },
+  ];
+  blooms.forEach((bloom) => {
+    for (let i = 0; i < 7; i += 1) {
+      const angle = (Math.PI * 2 * i) / 7;
+      ctx.fillStyle = bloom.color;
+      ctx.globalAlpha = alpha * (0.22 + i * 0.035);
+      ctx.beginPath();
+      ctx.ellipse(
+        cx + bloom.dx * unit + Math.cos(angle) * bloom.size * unit * 0.36,
+        cy + bloom.dy * unit + Math.sin(angle) * bloom.size * unit * 0.36,
+        bloom.size * unit * 0.28,
+        bloom.size * unit * 0.18,
+        angle,
+        0,
+        Math.PI * 2,
+      );
+      ctx.fill();
+    }
+    ctx.fillStyle = "#d5a454";
+    ctx.globalAlpha = alpha * 0.65;
+    ctx.beginPath();
+    ctx.arc(cx + bloom.dx * unit, cy + bloom.dy * unit, bloom.size * unit * 0.12, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  ctx.strokeStyle = "#718b72";
+  ctx.lineWidth = Math.max(2, unit * 0.012);
+  ctx.globalAlpha = alpha * 0.65;
+  ctx.lineCap = "round";
+  [-0.18, 0.03, 0.18].forEach((dx, index) => {
+    ctx.beginPath();
+    ctx.moveTo(cx + dx * unit, cy - (index === 1 ? 0.18 : 0.04) * unit);
+    ctx.quadraticCurveTo(cx + dx * unit * 0.5, cy + 0.2 * unit, cx - 0.03 * unit, cy + 0.42 * unit);
+    ctx.stroke();
+  });
+  for (let i = 0; i < 6; i += 1) {
+    ctx.fillStyle = i % 2 ? "#8ca487" : "#6f9274";
+    ctx.globalAlpha = alpha * 0.4;
+    ctx.beginPath();
+    ctx.ellipse(
+      cx + (i % 2 ? -1 : 1) * (0.07 + i * 0.018) * unit,
+      cy + (0.1 + i * 0.045) * unit,
+      0.09 * unit,
+      0.035 * unit,
+      (i % 2 ? -0.45 : 0.45),
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawSource(
+  ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement | null,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  settings: EditorSettings,
+  alpha = 1,
+) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  if (image) {
+    drawImageCover(ctx, image, image.naturalWidth, image.naturalHeight, x, y, width, height, settings);
+  } else {
+    drawSampleArt(ctx, x, y, width, height);
+  }
+  ctx.restore();
+}
+
+function drawLines(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  startY: number,
+  width: number,
+  count: number,
+  gap: number,
+) {
+  ctx.save();
+  ctx.strokeStyle = paleInk;
+  ctx.lineWidth = 2;
+  for (let i = 0; i < count; i += 1) {
+    const y = startY + i * gap;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + width, y);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawMessage(ctx: CanvasRenderingContext2D, message: string, x: number, y: number, maxWidth: number) {
+  if (!message.trim()) return;
+  ctx.save();
+  ctx.fillStyle = ink;
+  ctx.font = '34px "Yu Mincho", "Hiragino Mincho ProN", serif';
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  message.split("\n").slice(0, 4).forEach((line, index) => {
+    ctx.fillText(line, x, y + index * 52, maxWidth);
+  });
+  ctx.restore();
+}
+
+function drawLeafAccent(ctx: CanvasRenderingContext2D, x: number, y: number, flip = false) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(flip ? -1 : 1, 1);
+  ctx.strokeStyle = green;
+  ctx.fillStyle = "#afbea5";
+  ctx.lineWidth = 4;
+  ctx.globalAlpha = 0.78;
+  ctx.beginPath();
+  ctx.moveTo(0, 100);
+  ctx.quadraticCurveTo(42, 42, 22, 0);
+  ctx.stroke();
+  [[12, 72, -0.55], [28, 48, 0.7], [24, 22, -0.65]].forEach(([lx, ly, rotation]) => {
+    ctx.save();
+    ctx.translate(lx, ly);
+    ctx.rotate(rotation);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 24, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+  ctx.restore();
+}
+
+export function renderPiece(
+  canvas: HTMLCanvasElement,
+  template: TemplateId,
+  image: HTMLImageElement | null,
+  settings: EditorSettings,
+  scale = 1,
+) {
+  canvas.width = Math.round(PIECE_WIDTH * scale);
+  canvas.height = Math.round(PIECE_HEIGHT * scale);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  ctx.scale(scale, scale);
+  ctx.fillStyle = paper;
+  ctx.fillRect(0, 0, PIECE_WIDTH, PIECE_HEIGHT);
+
+  if (template === "watermark") {
+    drawSource(ctx, image, 0, 0, PIECE_WIDTH, PIECE_HEIGHT, settings, image ? 0.18 : 0.42);
+    ctx.fillStyle = "rgba(255,253,247,.36)";
+    ctx.fillRect(0, 0, PIECE_WIDTH, PIECE_HEIGHT);
+    ctx.fillStyle = ink;
+    ctx.font = '42px "Yu Mincho", serif';
+    ctx.fillText("おたより", 120, 154);
+    if (settings.showLines) drawLines(ctx, 120, 300, 1000, 13, 94);
+    drawMessage(ctx, settings.message, 120, 220, 1000);
+  }
+
+  if (template === "frame") {
+    ctx.strokeStyle = "#9dac97";
+    ctx.lineWidth = 5;
+    roundedRect(ctx, 64, 64, PIECE_WIDTH - 128, PIECE_HEIGHT - 128, 32);
+    ctx.stroke();
+    ctx.strokeStyle = "#d7cbbb";
+    ctx.lineWidth = 2;
+    roundedRect(ctx, 82, 82, PIECE_WIDTH - 164, PIECE_HEIGHT - 164, 24);
+    ctx.stroke();
+    drawSource(ctx, image, 100, 90, PIECE_WIDTH - 200, 400, settings, 0.92);
+    ctx.fillStyle = "rgba(255,253,247,.42)";
+    const fade = ctx.createLinearGradient(0, 300, 0, 540);
+    fade.addColorStop(0, "rgba(255,253,247,0)");
+    fade.addColorStop(1, paper);
+    ctx.fillStyle = fade;
+    ctx.fillRect(90, 300, PIECE_WIDTH - 180, 250);
+    if (settings.showLines) drawLines(ctx, 145, 620, 950, 9, 100);
+    drawMessage(ctx, settings.message, 145, 545, 950);
+    drawLeafAccent(ctx, 105, 1480);
+    drawLeafAccent(ctx, 1135, 1480, true);
+  }
+
+  if (template === "scatter") {
+    drawSource(ctx, image, 790, 65, 380, 330, settings, 0.82);
+    drawSource(ctx, image, 42, 1260, 310, 410, settings, 0.64);
+    drawSource(ctx, image, 940, 1375, 225, 245, settings, 0.5);
+    ctx.fillStyle = ink;
+    ctx.font = '40px "Yu Mincho", serif';
+    ctx.fillText("ひとこと、ふたこと。", 115, 165);
+    if (settings.showLines) drawLines(ctx, 145, 470, 900, 9, 105);
+    drawMessage(ctx, settings.message, 145, 380, 900);
+  }
+
+  if (template === "card") {
+    ctx.fillStyle = "#f4efe3";
+    roundedRect(ctx, 70, 285, PIECE_WIDTH - 140, 1180, 38);
+    ctx.fill();
+    ctx.strokeStyle = "#b8a98e";
+    ctx.lineWidth = 4;
+    roundedRect(ctx, 70, 285, PIECE_WIDTH - 140, 1180, 38);
+    ctx.stroke();
+    drawSource(ctx, image, 115, 330, PIECE_WIDTH - 230, 670, settings, 0.92);
+    ctx.fillStyle = paper;
+    ctx.fillRect(115, 950, PIECE_WIDTH - 230, 410);
+    ctx.fillStyle = green;
+    ctx.textAlign = "center";
+    ctx.font = '48px "Yu Mincho", serif';
+    ctx.fillText("ありがとう", PIECE_WIDTH / 2, 1080);
+    ctx.textAlign = "left";
+    drawMessage(ctx, settings.message, 180, 1160, PIECE_WIDTH - 360);
+  }
+
+  ctx.strokeStyle = "rgba(130,116,97,.16)";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(1, 1, PIECE_WIDTH - 2, PIECE_HEIGHT - 2);
+}
+
+export function renderArtworkPreview(
+  canvas: HTMLCanvasElement,
+  image: HTMLImageElement | null,
+  settings: EditorSettings,
+) {
+  canvas.width = 960;
+  canvas.height = 720;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  ctx.fillStyle = paper;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawSource(ctx, image, 22, 22, canvas.width - 44, canvas.height - 44, settings, 1);
+  ctx.strokeStyle = "rgba(130,116,97,.24)";
+  ctx.lineWidth = 3;
+  roundedRect(ctx, 12, 12, canvas.width - 24, canvas.height - 24, 28);
+  ctx.stroke();
+}
+
+export function renderA4(
+  canvas: HTMLCanvasElement,
+  template: TemplateId,
+  image: HTMLImageElement | null,
+  settings: EditorSettings,
+  scale = 1,
+) {
+  canvas.width = Math.round(A4_WIDTH * scale);
+  canvas.height = Math.round(A4_HEIGHT * scale);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const piece = document.createElement("canvas");
+  renderPiece(piece, template, image, settings);
+  const positions = [
+    [0, 0],
+    [PIECE_WIDTH, 0],
+    [0, PIECE_HEIGHT],
+    [PIECE_WIDTH, PIECE_HEIGHT],
+  ];
+  positions.forEach(([x, y]) => {
+    ctx.drawImage(piece, x * scale, y * scale, PIECE_WIDTH * scale, PIECE_HEIGHT * scale);
+  });
+
+  ctx.save();
+  ctx.strokeStyle = "rgba(120,112,100,.42)";
+  ctx.lineWidth = Math.max(1, 2 * scale);
+  ctx.setLineDash([14 * scale, 12 * scale]);
+  ctx.beginPath();
+  ctx.moveTo(PIECE_WIDTH * scale, 0);
+  ctx.lineTo(PIECE_WIDTH * scale, A4_HEIGHT * scale);
+  ctx.moveTo(0, PIECE_HEIGHT * scale);
+  ctx.lineTo(A4_WIDTH * scale, PIECE_HEIGHT * scale);
+  ctx.stroke();
+  ctx.restore();
+}
+
+export function downloadCanvas(canvas: HTMLCanvasElement, filename: string) {
+  const link = document.createElement("a");
+  link.download = filename;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+}
