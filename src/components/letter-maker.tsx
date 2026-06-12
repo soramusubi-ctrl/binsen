@@ -5,6 +5,7 @@ import NextImage from "next/image";
 import {
   downloadCanvas,
   EditorSettings,
+  FrameId,
   renderA4,
   renderPiece,
   TemplateId,
@@ -26,6 +27,19 @@ const adjustmentTools = [
   { id: "adjust", label: "調整", image: "/assets/tool-adjust.png" },
 ] as const;
 
+const frames: Array<{ id: FrameId; name: string }> = [
+  { id: "leaves", name: "若葉" },
+  { id: "flowers", name: "小花" },
+  { id: "mimosa", name: "ミモザ" },
+  { id: "lavender", name: "ラベンダー" },
+  { id: "berries", name: "木の実" },
+  { id: "ribbon", name: "リボン" },
+  { id: "dots", name: "水彩ドット" },
+  { id: "double", name: "二重線" },
+  { id: "corner", name: "角花" },
+  { id: "stars", name: "星空" },
+];
+
 const initialSettings: EditorSettings = {
   brightness: 105,
   cleanup: 18,
@@ -35,6 +49,7 @@ const initialSettings: EditorSettings = {
   offsetY: 0,
   showLines: true,
   message: "",
+  frame: "leaves",
 };
 
 function LeafMark() {
@@ -203,6 +218,27 @@ export function LetterMaker() {
                 </button>
               ))}
             </div>
+            {template === "frame" && (
+              <div className="frame-picker">
+                <div className="frame-picker-heading">
+                  <strong>フレーム柄を選ぶ</strong>
+                  <small>10種類</small>
+                </div>
+                <div className="frame-grid">
+                  {frames.map((frame) => (
+                    <button
+                      key={frame.id}
+                      className={settings.frame === frame.id ? `frame-choice ${frame.id} selected` : `frame-choice ${frame.id}`}
+                      onClick={() => updateSetting("frame", frame.id)}
+                      aria-pressed={settings.frame === frame.id}
+                    >
+                      <span><i /><i /><i /></span>
+                      <b>{frame.name}</b>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <label className="switch-row">
               <span><strong>罫線を入れる</strong><small>手書きしやすい薄い線</small></span>
               <input type="checkbox" checked={settings.showLines} onChange={(e) => updateSetting("showLines", e.target.checked)} />

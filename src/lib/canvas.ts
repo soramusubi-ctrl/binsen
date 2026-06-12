@@ -1,4 +1,15 @@
 export type TemplateId = "watermark" | "frame" | "scatter" | "card";
+export type FrameId =
+  | "leaves"
+  | "flowers"
+  | "mimosa"
+  | "lavender"
+  | "berries"
+  | "ribbon"
+  | "dots"
+  | "double"
+  | "corner"
+  | "stars";
 
 export type EditorSettings = {
   brightness: number;
@@ -9,6 +20,7 @@ export type EditorSettings = {
   offsetY: number;
   showLines: boolean;
   message: string;
+  frame: FrameId;
 };
 
 export const PIECE_WIDTH = 1240;
@@ -218,6 +230,144 @@ function drawLeafAccent(ctx: CanvasRenderingContext2D, x: number, y: number, fli
   ctx.restore();
 }
 
+function drawTinyFlower(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  color: string,
+  size = 14,
+) {
+  ctx.save();
+  ctx.fillStyle = color;
+  for (let i = 0; i < 5; i += 1) {
+    const angle = (Math.PI * 2 * i) / 5;
+    ctx.beginPath();
+    ctx.ellipse(x + Math.cos(angle) * size, y + Math.sin(angle) * size, size, size * 0.58, angle, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = "#d2a75c";
+  ctx.beginPath();
+  ctx.arc(x, y, size * 0.35, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawFramePreset(ctx: CanvasRenderingContext2D, frame: FrameId) {
+  const left = 64;
+  const top = 64;
+  const right = PIECE_WIDTH - 64;
+  const bottom = PIECE_HEIGHT - 64;
+  ctx.save();
+  ctx.lineCap = "round";
+  ctx.globalAlpha = 0.82;
+
+  if (frame === "double") {
+    ctx.strokeStyle = "#9dac97";
+    ctx.lineWidth = 5;
+    roundedRect(ctx, left, top, right - left, bottom - top, 32);
+    ctx.stroke();
+    ctx.strokeStyle = "#d7cbbb";
+    ctx.lineWidth = 2;
+    roundedRect(ctx, left + 18, top + 18, right - left - 36, bottom - top - 36, 24);
+    ctx.stroke();
+  } else {
+    ctx.strokeStyle = frame === "stars" ? "#c8aa68" : "#b7aa98";
+    ctx.lineWidth = frame === "dots" ? 2 : 3;
+    if (frame === "dots") ctx.setLineDash([2, 18]);
+    roundedRect(ctx, left, top, right - left, bottom - top, 28);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  if (frame === "leaves") {
+    drawLeafAccent(ctx, 98, 1450);
+    drawLeafAccent(ctx, 1140, 1450, true);
+    drawLeafAccent(ctx, 98, 170);
+    drawLeafAccent(ctx, 1140, 170, true);
+  }
+
+  if (frame === "flowers" || frame === "corner") {
+    const points = frame === "corner"
+      ? [[112, 120], [1128, 120], [112, 1634], [1128, 1634]]
+      : [[150, 120], [300, 105], [940, 105], [1090, 120], [150, 1635], [1090, 1635]];
+    points.forEach(([x, y], index) => drawTinyFlower(ctx, x, y, index % 2 ? "#e6b7a8" : "#d89ba6", frame === "corner" ? 20 : 13));
+  }
+
+  if (frame === "mimosa") {
+    ctx.fillStyle = "#dfb84e";
+    for (let y = 135; y < 1630; y += 78) {
+      [92, 1148].forEach((x, index) => {
+        ctx.beginPath();
+        ctx.arc(x, y + (index ? 25 : 0), 10, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+  }
+
+  if (frame === "lavender") {
+    ctx.strokeStyle = "#879578";
+    ctx.lineWidth = 3;
+    for (let x = 105; x < 1160; x += 145) {
+      ctx.beginPath();
+      ctx.moveTo(x, 1635);
+      ctx.lineTo(x + 18, 1555);
+      ctx.stroke();
+      for (let i = 0; i < 4; i += 1) {
+        ctx.fillStyle = i % 2 ? "#9b91b0" : "#b5a7c1";
+        ctx.beginPath();
+        ctx.ellipse(x + 10 + i * 3, 1570 + i * 16, 10, 5, -0.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  if (frame === "berries") {
+    const points = [[105, 115], [1135, 115], [105, 1638], [1135, 1638]];
+    points.forEach(([x, y]) => {
+      ctx.fillStyle = "#bb7f72";
+      [[0, 0], [22, 8], [8, 24]].forEach(([dx, dy]) => {
+        ctx.beginPath();
+        ctx.arc(x + dx, y + dy, 10, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    });
+  }
+
+  if (frame === "ribbon") {
+    ctx.strokeStyle = "#d78e91";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(510, 66);
+    ctx.quadraticCurveTo(620, 150, 730, 66);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(620, 82, 30, 18, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  if (frame === "dots") {
+    const colors = ["#dca098", "#e6c56f", "#9eae91", "#b8a6bd"];
+    for (let i = 0; i < 24; i += 1) {
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.beginPath();
+      ctx.arc(85 + i * 46, i % 2 ? 92 : 1660, 6 + (i % 3), 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  if (frame === "stars") {
+    ctx.fillStyle = "#d4af56";
+    [[105, 110], [1135, 110], [105, 1640], [1135, 1640], [620, 85]].forEach(([x, y]) => {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillRect(-9, -9, 18, 18);
+      ctx.restore();
+    });
+  }
+  ctx.restore();
+}
+
 export function renderPiece(
   canvas: HTMLCanvasElement,
   template: TemplateId,
@@ -245,14 +395,7 @@ export function renderPiece(
   }
 
   if (template === "frame") {
-    ctx.strokeStyle = "#9dac97";
-    ctx.lineWidth = 5;
-    roundedRect(ctx, 64, 64, PIECE_WIDTH - 128, PIECE_HEIGHT - 128, 32);
-    ctx.stroke();
-    ctx.strokeStyle = "#d7cbbb";
-    ctx.lineWidth = 2;
-    roundedRect(ctx, 82, 82, PIECE_WIDTH - 164, PIECE_HEIGHT - 164, 24);
-    ctx.stroke();
+    drawFramePreset(ctx, settings.frame);
     drawSource(ctx, image, 100, 90, PIECE_WIDTH - 200, 400, settings, 0.92);
     ctx.fillStyle = "rgba(255,253,247,.42)";
     const fade = ctx.createLinearGradient(0, 300, 0, 540);
@@ -262,8 +405,6 @@ export function renderPiece(
     ctx.fillRect(90, 300, PIECE_WIDTH - 180, 250);
     if (settings.showLines) drawLines(ctx, 145, 620, 950, 9, 100);
     drawMessage(ctx, settings.message, 145, 545, 950);
-    drawLeafAccent(ctx, 105, 1480);
-    drawLeafAccent(ctx, 1135, 1480, true);
   }
 
   if (template === "scatter") {
