@@ -387,11 +387,8 @@ export function renderPiece(
     drawSource(ctx, image, 0, 0, PIECE_WIDTH, PIECE_HEIGHT, settings, image ? 0.18 : 0.42);
     ctx.fillStyle = "rgba(255,253,247,.36)";
     ctx.fillRect(0, 0, PIECE_WIDTH, PIECE_HEIGHT);
-    ctx.fillStyle = ink;
-    ctx.font = '42px "Yu Mincho", serif';
-    ctx.fillText("おたより", 120, 154);
-    if (settings.showLines) drawLines(ctx, 120, 300, 1000, 13, 94);
-    drawMessage(ctx, settings.message, 120, 220, 1000);
+    if (settings.showLines) drawLines(ctx, 120, 210, 1000, 14, 94);
+    drawMessage(ctx, settings.message, 120, 130, 1000);
   }
 
   if (template === "frame") {
@@ -411,11 +408,8 @@ export function renderPiece(
     drawSource(ctx, image, 790, 65, 380, 330, settings, 0.82);
     drawSource(ctx, image, 42, 1260, 310, 410, settings, 0.64);
     drawSource(ctx, image, 940, 1375, 225, 245, settings, 0.5);
-    ctx.fillStyle = ink;
-    ctx.font = '40px "Yu Mincho", serif';
-    ctx.fillText("ひとこと、ふたこと。", 115, 165);
-    if (settings.showLines) drawLines(ctx, 145, 470, 900, 9, 105);
-    drawMessage(ctx, settings.message, 145, 380, 900);
+    if (settings.showLines) drawLines(ctx, 145, 300, 900, 11, 105);
+    drawMessage(ctx, settings.message, 145, 210, 900);
   }
 
   if (template === "card") {
@@ -429,12 +423,7 @@ export function renderPiece(
     drawSource(ctx, image, 115, 330, PIECE_WIDTH - 230, 670, settings, 0.92);
     ctx.fillStyle = paper;
     ctx.fillRect(115, 950, PIECE_WIDTH - 230, 410);
-    ctx.fillStyle = green;
-    ctx.textAlign = "center";
-    ctx.font = '48px "Yu Mincho", serif';
-    ctx.fillText("ありがとう", PIECE_WIDTH / 2, 1080);
-    ctx.textAlign = "left";
-    drawMessage(ctx, settings.message, 180, 1160, PIECE_WIDTH - 360);
+    drawMessage(ctx, settings.message, 180, 1050, PIECE_WIDTH - 360);
   }
 
   ctx.strokeStyle = "rgba(130,116,97,.16)";
