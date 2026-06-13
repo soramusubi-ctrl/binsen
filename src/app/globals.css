@@ -103,6 +103,24 @@ button { color: inherit; }
 .section-heading p { margin: 0; color: var(--muted); font-size: 10px; }
 
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+.empty-artwork-upload {
+  width: 100%; min-height: 270px; margin-bottom: 11px; padding: 28px 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  border: 2px dashed #96aa90; border-radius: 17px; color: var(--ink);
+  background: linear-gradient(145deg, #fbfdf9, #f1f6ed); cursor: pointer;
+  box-shadow: inset 0 0 0 7px rgba(255,255,255,.62), 0 5px 16px rgba(91,112,84,.07);
+  transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+.empty-artwork-upload:hover { border-color: var(--green); background: #edf5e9; transform: translateY(-1px); }
+.empty-artwork-upload strong { margin-top: 5px; color: #536d50; font-family: "Yu Mincho", serif; font-size: 16px; letter-spacing: .06em; }
+.empty-artwork-upload > span:not(.camera-mark) { color: var(--muted); font-size: 10px; }
+.empty-artwork-upload small { padding: 4px 9px; border-radius: 999px; color: var(--green); background: white; font-size: 8px; }
+.camera-mark {
+  position: relative; display: grid; place-items: center; width: 64px; height: 50px;
+  border: 2px solid var(--green); border-radius: 12px; background: white;
+}
+.camera-mark::before { content: ""; position: absolute; top: -9px; width: 25px; height: 10px; border: 2px solid var(--green); border-bottom: 0; border-radius: 7px 7px 0 0; background: white; }
+.camera-mark i { width: 23px; height: 23px; border: 2px solid var(--green); border-radius: 50%; box-shadow: inset 0 0 0 5px #dce8d8; }
 .artwork-preview {
   position: relative;
   margin-bottom: 11px;
@@ -257,6 +275,7 @@ footer strong { color: var(--green); letter-spacing: .1em; }
   .hero h1 { font-size: 27px; line-height: 1.5; }
   .hero > div > p:last-child { font-size: 11px; }
   .workspace { padding: 0 10px; gap: 12px; margin-bottom: 50px; }
+  .empty-artwork-upload { min-height: 230px; }
   .preview-area, .control-card { border-radius: 16px; padding: 15px; }
   .preview-area { position: relative; }
   .paper-stage { padding: 17px 30px 11px; }

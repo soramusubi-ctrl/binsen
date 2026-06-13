@@ -174,25 +174,29 @@ export function LetterMaker() {
               capture="environment"
               onChange={handleImage}
             />
-            <ArtworkPreview image={image} settings={settings} />
-            <button className="upload-button" onClick={() => fileRef.current?.click()}>
-              <span className="upload-icon">＋</span>
-              <strong>{image ? "別の絵を選ぶ" : "絵を選ぶ・撮影する"}</strong>
-              <small>{imageName || "JPG / PNG"}</small>
-            </button>
-            <div className="adjust-tool-grid">
-              {adjustmentTools.map((tool) => (
-                <button
-                  key={tool.id}
-                  className={showAdjustments ? "active" : ""}
-                  onClick={() => setShowAdjustments(true)}
-                >
-                  <NextImage src={tool.image} alt="" width={64} height={64} />
-                  <span>{tool.label}</span>
-                </button>
-              ))}
-            </div>
-            {showAdjustments && (
+            <ArtworkPreview image={image} settings={settings} onSelect={() => fileRef.current?.click()} />
+            {image && (
+              <button className="upload-button" onClick={() => fileRef.current?.click()}>
+                <span className="upload-icon">＋</span>
+                <strong>別の絵を選ぶ</strong>
+                <small>{imageName}</small>
+              </button>
+            )}
+            {image && (
+              <div className="adjust-tool-grid">
+                {adjustmentTools.map((tool) => (
+                  <button
+                    key={tool.id}
+                    className={showAdjustments ? "active" : ""}
+                    onClick={() => setShowAdjustments(true)}
+                  >
+                    <NextImage src={tool.image} alt="" width={64} height={64} />
+                    <span>{tool.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {image && showAdjustments && (
               <div className="adjustments">
                 <button className="close-adjustments" onClick={() => setShowAdjustments(false)}>調整を閉じる ×</button>
                 <RangeField label="明るさ" value={settings.brightness} min={70} max={140} onChange={(v) => updateSetting("brightness", v)} />
