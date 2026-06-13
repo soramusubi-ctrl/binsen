@@ -10,6 +10,7 @@ export type FrameId =
   | "double"
   | "corner"
   | "stars";
+export type LineStyleId = "solid" | "dashed" | "double" | "handdrawn" | "dots";
 
 export type EditorSettings = {
   brightness: number;
@@ -19,6 +20,7 @@ export type EditorSettings = {
   offsetX: number;
   offsetY: number;
   showLines: boolean;
+  lineStyle: LineStyleId;
   message: string;
   frame: FrameId;
 };
@@ -179,16 +181,40 @@ function drawLines(
   width: number,
   count: number,
   gap: number,
+  style: LineStyleId,
 ) {
   ctx.save();
   ctx.strokeStyle = paleInk;
   ctx.lineWidth = 2;
+  if (style === "dashed") ctx.setLineDash([18, 14]);
+  if (style === "dots") {
+    ctx.lineWidth = 4;
+    ctx.lineCap = "round";
+    ctx.setLineDash([1, 18]);
+  }
   for (let i = 0; i < count; i += 1) {
     const y = startY + i * gap;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + width, y);
-    ctx.stroke();
+    if (style === "handdrawn") {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      for (let segment = 1; segment <= 12; segment += 1) {
+        const px = x + (width * segment) / 12;
+        const py = y + Math.sin(segment * 1.8 + i) * 2.5;
+        ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + width, y);
+      ctx.stroke();
+      if (style === "double") {
+        ctx.beginPath();
+        ctx.moveTo(x, y + 7);
+        ctx.lineTo(x + width, y + 7);
+        ctx.stroke();
+      }
+    }
   }
   ctx.restore();
 }
@@ -387,7 +413,7 @@ export function renderPiece(
     drawSource(ctx, image, 0, 0, PIECE_WIDTH, PIECE_HEIGHT, settings, image ? 0.18 : 0.42);
     ctx.fillStyle = "rgba(255,253,247,.36)";
     ctx.fillRect(0, 0, PIECE_WIDTH, PIECE_HEIGHT);
-    if (settings.showLines) drawLines(ctx, 120, 210, 1000, 14, 94);
+    if (settings.showLines) drawLines(ctx, 120, 210, 1000, 14, 94, settings.lineStyle);
     drawMessage(ctx, settings.message, 120, 130, 1000);
   }
 
@@ -400,7 +426,7 @@ export function renderPiece(
     fade.addColorStop(1, paper);
     ctx.fillStyle = fade;
     ctx.fillRect(90, 300, PIECE_WIDTH - 180, 250);
-    if (settings.showLines) drawLines(ctx, 145, 620, 950, 9, 100);
+    if (settings.showLines) drawLines(ctx, 145, 620, 950, 9, 100, settings.lineStyle);
     drawMessage(ctx, settings.message, 145, 545, 950);
   }
 
@@ -408,7 +434,7 @@ export function renderPiece(
     drawSource(ctx, image, 790, 65, 380, 330, settings, 0.82);
     drawSource(ctx, image, 42, 1260, 310, 410, settings, 0.64);
     drawSource(ctx, image, 940, 1375, 225, 245, settings, 0.5);
-    if (settings.showLines) drawLines(ctx, 145, 300, 900, 11, 105);
+    if (settings.showLines) drawLines(ctx, 145, 300, 900, 11, 105, settings.lineStyle);
     drawMessage(ctx, settings.message, 145, 210, 900);
   }
 

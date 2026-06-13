@@ -6,6 +6,7 @@ import {
   downloadCanvas,
   EditorSettings,
   FrameId,
+  LineStyleId,
   renderA4,
   renderPiece,
   TemplateId,
@@ -40,6 +41,14 @@ const frames: Array<{ id: FrameId; name: string }> = [
   { id: "stars", name: "星空" },
 ];
 
+const lineStyles: Array<{ id: LineStyleId; name: string }> = [
+  { id: "solid", name: "標準線" },
+  { id: "dashed", name: "点線" },
+  { id: "double", name: "二重線" },
+  { id: "handdrawn", name: "手描き風" },
+  { id: "dots", name: "ドット" },
+];
+
 const initialSettings: EditorSettings = {
   brightness: 105,
   cleanup: 18,
@@ -48,6 +57,7 @@ const initialSettings: EditorSettings = {
   offsetX: 0,
   offsetY: 0,
   showLines: true,
+  lineStyle: "solid",
   message: "",
   frame: "leaves",
 };
@@ -243,6 +253,21 @@ export function LetterMaker() {
               <span><strong>罫線を入れる</strong><small>手書きしやすい薄い線</small></span>
               <input type="checkbox" checked={settings.showLines} onChange={(e) => updateSetting("showLines", e.target.checked)} />
             </label>
+            {settings.showLines && (
+              <div className="line-picker">
+                {lineStyles.map((line) => (
+                  <button
+                    key={line.id}
+                    className={settings.lineStyle === line.id ? `line-choice ${line.id} selected` : `line-choice ${line.id}`}
+                    onClick={() => updateSetting("lineStyle", line.id)}
+                    aria-pressed={settings.lineStyle === line.id}
+                  >
+                    <span><i /></span>
+                    <b>{line.name}</b>
+                  </button>
+                ))}
+              </div>
+            )}
             <label className="message-field">
               <span><strong>文字を入れる</strong> <small>なくてもOK</small></span>
               <textarea
