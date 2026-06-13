@@ -32,7 +32,7 @@ export const A4_HEIGHT = 3508;
 
 const ink = "#73675a";
 const paleInk = "#b7aa98";
-const paper = "#fffdf7";
+const paper = "#ffffff";
 const green = "#788d76";
 
 function roundedRect(
@@ -411,7 +411,7 @@ export function renderPiece(
 
   if (template === "watermark") {
     drawSource(ctx, image, 0, 0, PIECE_WIDTH, PIECE_HEIGHT, settings, image ? 0.18 : 0.42);
-    ctx.fillStyle = "rgba(255,253,247,.36)";
+    ctx.fillStyle = "rgba(255,255,255,.46)";
     ctx.fillRect(0, 0, PIECE_WIDTH, PIECE_HEIGHT);
     if (settings.showLines) drawLines(ctx, 120, 210, 1000, 14, 94, settings.lineStyle);
     drawMessage(ctx, settings.message, 120, 130, 1000);
@@ -420,9 +420,9 @@ export function renderPiece(
   if (template === "frame") {
     drawFramePreset(ctx, settings.frame);
     drawSource(ctx, image, 100, 90, PIECE_WIDTH - 200, 400, settings, 0.92);
-    ctx.fillStyle = "rgba(255,253,247,.42)";
+    ctx.fillStyle = "rgba(255,255,255,.52)";
     const fade = ctx.createLinearGradient(0, 300, 0, 540);
-    fade.addColorStop(0, "rgba(255,253,247,0)");
+    fade.addColorStop(0, "rgba(255,255,255,0)");
     fade.addColorStop(1, paper);
     ctx.fillStyle = fade;
     ctx.fillRect(90, 300, PIECE_WIDTH - 180, 250);
@@ -439,7 +439,7 @@ export function renderPiece(
   }
 
   if (template === "card") {
-    ctx.fillStyle = "#f4efe3";
+    ctx.fillStyle = "#ffffff";
     roundedRect(ctx, 70, 285, PIECE_WIDTH - 140, 1180, 38);
     ctx.fill();
     ctx.strokeStyle = "#b8a98e";
