@@ -394,6 +394,38 @@ function drawFramePreset(ctx: CanvasRenderingContext2D, frame: FrameId) {
   ctx.restore();
 }
 
+function drawCardBotanicalCorner(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  flipX = false,
+  flipY = false,
+) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+  ctx.globalAlpha = 0.78;
+  ctx.strokeStyle = "#809478";
+  ctx.fillStyle = "#9caf91";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(0, 125);
+  ctx.quadraticCurveTo(42, 58, 115, 0);
+  ctx.stroke();
+  [[28, 88, -0.5], [54, 58, 0.55], [84, 30, -0.5]].forEach(([lx, ly, angle]) => {
+    ctx.save();
+    ctx.translate(lx, ly);
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 27, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+  drawTinyFlower(ctx, 42, 78, "#e2a9aa", 13);
+  drawTinyFlower(ctx, 92, 20, "#e7c27b", 10);
+  ctx.restore();
+}
+
 export function renderPiece(
   canvas: HTMLCanvasElement,
   template: TemplateId,
@@ -439,17 +471,23 @@ export function renderPiece(
   }
 
   if (template === "card") {
-    ctx.fillStyle = "#ffffff";
-    roundedRect(ctx, 70, 285, PIECE_WIDTH - 140, 1180, 38);
-    ctx.fill();
-    ctx.strokeStyle = "#b8a98e";
-    ctx.lineWidth = 4;
-    roundedRect(ctx, 70, 285, PIECE_WIDTH - 140, 1180, 38);
+    ctx.strokeStyle = "#9eae98";
+    ctx.lineWidth = 3;
+    roundedRect(ctx, 76, 278, PIECE_WIDTH - 152, 1195, 24);
     ctx.stroke();
-    drawSource(ctx, image, 115, 330, PIECE_WIDTH - 230, 670, settings, 0.92);
-    ctx.fillStyle = paper;
-    ctx.fillRect(115, 950, PIECE_WIDTH - 230, 410);
-    drawMessage(ctx, settings.message, 180, 1050, PIECE_WIDTH - 360);
+    ctx.strokeStyle = "#e2d9ca";
+    ctx.lineWidth = 1.5;
+    roundedRect(ctx, 91, 293, PIECE_WIDTH - 182, 1165, 18);
+    ctx.stroke();
+    drawCardBotanicalCorner(ctx, 92, 296);
+    drawCardBotanicalCorner(ctx, PIECE_WIDTH - 92, 1455, true, true);
+    drawSource(ctx, image, 135, 350, PIECE_WIDTH - 270, 660, settings, 0.9);
+    const cardFade = ctx.createLinearGradient(0, 850, 0, 1080);
+    cardFade.addColorStop(0, "rgba(255,255,255,0)");
+    cardFade.addColorStop(1, "#ffffff");
+    ctx.fillStyle = cardFade;
+    ctx.fillRect(125, 850, PIECE_WIDTH - 250, 240);
+    drawMessage(ctx, settings.message, 180, 1080, PIECE_WIDTH - 360);
   }
 
   ctx.strokeStyle = "rgba(130,116,97,.16)";
