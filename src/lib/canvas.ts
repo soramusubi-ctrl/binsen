@@ -21,6 +21,7 @@ export type EditorSettings = {
   offsetY: number;
   showLines: boolean;
   lineStyle: LineStyleId;
+  watermarkOpacity: number;
   message: string;
   frame: FrameId;
 };
@@ -442,8 +443,9 @@ export function renderPiece(
   ctx.fillRect(0, 0, PIECE_WIDTH, PIECE_HEIGHT);
 
   if (template === "watermark") {
-    drawSource(ctx, image, 0, 0, PIECE_WIDTH, PIECE_HEIGHT, settings, image ? 0.18 : 0.42);
-    ctx.fillStyle = "rgba(255,255,255,.46)";
+    const sourceOpacity = image ? settings.watermarkOpacity / 100 : 0.42;
+    drawSource(ctx, image, 0, 0, PIECE_WIDTH, PIECE_HEIGHT, settings, sourceOpacity);
+    ctx.fillStyle = `rgba(255,255,255,${Math.max(0.18, 0.62 - settings.watermarkOpacity / 120)})`;
     ctx.fillRect(0, 0, PIECE_WIDTH, PIECE_HEIGHT);
     if (settings.showLines) drawLines(ctx, 120, 210, 1000, 14, 94, settings.lineStyle);
     drawMessage(ctx, settings.message, 120, 130, 1000);

@@ -58,6 +58,7 @@ const initialSettings: EditorSettings = {
   offsetY: 0,
   showLines: true,
   lineStyle: "solid",
+  watermarkOpacity: 32,
   message: "",
   frame: "leaves",
 };
@@ -232,6 +233,18 @@ export function LetterMaker() {
                 </button>
               ))}
             </div>
+            {template === "watermark" && (
+              <div className="watermark-density">
+                <RangeField
+                  label="透かしの濃さ"
+                  value={settings.watermarkOpacity}
+                  min={18}
+                  max={70}
+                  onChange={(v) => updateSetting("watermarkOpacity", v)}
+                />
+                <p>印刷で薄いときは右へ。文字を書きたいときは濃くしすぎないのがおすすめです。</p>
+              </div>
+            )}
             {template === "frame" && (
               <div className="frame-picker">
                 <div className="frame-picker-heading">
