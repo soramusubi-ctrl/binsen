@@ -170,15 +170,23 @@ export function LetterMaker() {
       </header>
 
       <section className="hero">
-        <div>
-          <p className="eyebrow">おうちプリンタで、すぐ使える</p>
-          <h1>手書きのやさしさを、<br /><em>あなたの言葉</em>にのせて。</h1>
-          <p>絵を選んで、好きな形を選ぶだけ。<br />A4用紙から、小さな便箋が4枚できあがります。</p>
+        <div className="hero-copy">
+          <p className="eyebrow">描いた絵を、便箋に。</p>
+          <h1>世界に一つだけの<br /><em>私の便箋</em>で伝えよう。</h1>
+          <p>手書きの絵を選んで、好きな形に整えるだけ。<br />A4用紙から、小さな便箋が4枚できあがります。</p>
         </div>
-        <div className="steps" aria-label="使い方">
-          <span className="active"><b>1</b>絵を選ぶ</span><i />
-          <span><b>2</b>かたちを選ぶ</span><i />
-          <span><b>3</b>保存する</span>
+        <div className="hero-side">
+          <div className="hero-thumbnail" aria-hidden="true">
+            <span className="thumb-flower" />
+            <span className="thumb-line" />
+            <span className="thumb-line" />
+            <span className="thumb-line short" />
+          </div>
+          <div className="steps" aria-label="使い方">
+            <span className="active"><b>1</b>絵を選ぶ</span><i />
+            <span><b>2</b>かたちを選ぶ</span><i />
+            <span><b>3</b>保存する</span>
+          </div>
         </div>
       </section>
 
