@@ -10,6 +10,7 @@ import {
   LineStyleId,
   ScatterCount,
   ScatterShapeId,
+  WatercolorFrameColorId,
   renderA4,
   renderPiece,
   TemplateId,
@@ -42,6 +43,15 @@ const frames: Array<{ id: FrameId; name: string }> = [
   { id: "double", name: "二重線" },
   { id: "corner", name: "角花" },
   { id: "stars", name: "星空" },
+  { id: "waterblue", name: "水彩ライン" },
+];
+
+const watercolorFrameColors: Array<{ id: WatercolorFrameColorId; name: string }> = [
+  { id: "blue", name: "青" },
+  { id: "green", name: "緑" },
+  { id: "pink", name: "桃" },
+  { id: "brown", name: "茶" },
+  { id: "violet", name: "紫" },
 ];
 
 const lineStyles: Array<{ id: LineStyleId; name: string }> = [
@@ -81,6 +91,7 @@ const initialSettings: EditorSettings = {
   scatterCount: 3,
   message: "",
   frame: "leaves",
+  watercolorFrameColor: "blue",
 };
 
 function LeafMark() {
@@ -281,7 +292,7 @@ export function LetterMaker() {
               <div className="frame-picker">
                 <div className="frame-picker-heading">
                   <strong>フレーム柄を選ぶ</strong>
-                  <small>10種類</small>
+                  <small>11種類</small>
                 </div>
                 <div className="frame-grid">
                   {frames.map((frame) => (
@@ -296,6 +307,27 @@ export function LetterMaker() {
                     </button>
                   ))}
                 </div>
+                {settings.frame === "waterblue" && (
+                  <div className="watercolor-color-picker">
+                    <div className="frame-picker-heading">
+                      <strong>水彩ラインの色</strong>
+                      <small>5色</small>
+                    </div>
+                    <div className="watercolor-color-grid">
+                      {watercolorFrameColors.map((color) => (
+                        <button
+                          key={color.id}
+                          className={settings.watercolorFrameColor === color.id ? `watercolor-color ${color.id} selected` : `watercolor-color ${color.id}`}
+                          onClick={() => updateSetting("watercolorFrameColor", color.id)}
+                          aria-pressed={settings.watercolorFrameColor === color.id}
+                        >
+                          <span />
+                          <b>{color.name}</b>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             {template === "scatter" && (

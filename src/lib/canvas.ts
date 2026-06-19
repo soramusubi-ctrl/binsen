@@ -9,10 +9,12 @@ export type FrameId =
   | "dots"
   | "double"
   | "corner"
-  | "stars";
+  | "stars"
+  | "waterblue";
 export type LineStyleId = "none" | "solid" | "dashed" | "double" | "handdrawn" | "dots";
 export type ScatterShapeId = "square" | "circle" | "oval" | "cloud" | "stamp";
 export type ScatterCount = 3 | 5 | 8;
+export type WatercolorFrameColorId = "blue" | "green" | "pink" | "brown" | "violet";
 
 export type EditorSettings = {
   brightness: number;
@@ -28,6 +30,7 @@ export type EditorSettings = {
   scatterCount: ScatterCount;
   message: string;
   frame: FrameId;
+  watercolorFrameColor: WatercolorFrameColorId;
 };
 
 export const PIECE_WIDTH = 1240;
@@ -39,6 +42,46 @@ const ink = "#73675a";
 const paleInk = "#b7aa98";
 const paper = "#ffffff";
 const green = "#788d76";
+const watercolorFramePalettes: Record<
+  WatercolorFrameColorId,
+  { strong: string; pale: string; cap: string; washStart: string; washEnd: string }
+> = {
+  blue: {
+    strong: "#2f95d7",
+    pale: "#8ecbec",
+    cap: "rgba(47,149,215,.28)",
+    washStart: "rgba(105,184,226,.22)",
+    washEnd: "rgba(105,184,226,0)",
+  },
+  green: {
+    strong: "#6da35f",
+    pale: "#b5d49c",
+    cap: "rgba(109,163,95,.28)",
+    washStart: "rgba(155,199,131,.22)",
+    washEnd: "rgba(155,199,131,0)",
+  },
+  pink: {
+    strong: "#d78398",
+    pale: "#efb7bf",
+    cap: "rgba(215,131,152,.28)",
+    washStart: "rgba(232,166,181,.22)",
+    washEnd: "rgba(232,166,181,0)",
+  },
+  brown: {
+    strong: "#b38a62",
+    pale: "#d8bea0",
+    cap: "rgba(179,138,98,.28)",
+    washStart: "rgba(198,166,128,.2)",
+    washEnd: "rgba(198,166,128,0)",
+  },
+  violet: {
+    strong: "#9078b2",
+    pale: "#c4b4d7",
+    cap: "rgba(144,120,178,.28)",
+    washStart: "rgba(181,160,207,.2)",
+    washEnd: "rgba(181,160,207,0)",
+  },
+};
 
 function roundedRect(
   ctx: CanvasRenderingContext2D,
@@ -381,7 +424,101 @@ function drawTinyFlower(
   ctx.restore();
 }
 
-function drawFramePreset(ctx: CanvasRenderingContext2D, frame: FrameId) {
+function drawWatercolorStroke(
+  ctx: CanvasRenderingContext2D,
+  points: Array<[number, number]>,
+  color: string,
+  width: number,
+  alpha: number,
+) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.globalAlpha = alpha;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  points.forEach(([x, y], index) => {
+    if (index === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawWatercolorLineFrame(ctx: CanvasRenderingContext2D, colorId: WatercolorFrameColorId) {
+  const palette = watercolorFramePalettes[colorId];
+  ctx.save();
+
+  const topLines = [
+    { y: 82, width: 16, alpha: 0.46 },
+    { y: 88, width: 9, alpha: 0.24 },
+    { y: 74, width: 7, alpha: 0.18 },
+  ];
+  topLines.forEach((line, index) => {
+    drawWatercolorStroke(
+      ctx,
+      [[74, line.y + index * 2], [330, line.y - 8], [610, line.y + 1], [905, line.y - 5], [1164, line.y + 4]],
+      palette.strong,
+      line.width,
+      line.alpha,
+    );
+  });
+
+  const sides = [
+    { x: 78, sign: 1 },
+    { x: 1162, sign: -1 },
+  ];
+  sides.forEach(({ x, sign }) => {
+    drawWatercolorStroke(
+      ctx,
+      [[x, 82], [x + sign * 8, 410], [x + sign * 3, 800], [x + sign * 10, 1210], [x + sign * 2, 1678]],
+      palette.strong,
+      15,
+      0.34,
+    );
+    drawWatercolorStroke(
+      ctx,
+      [[x + sign * 13, 86], [x + sign * 4, 510], [x + sign * 16, 1040], [x + sign * 8, 1666]],
+      palette.pale,
+      7,
+      0.28,
+    );
+  });
+
+  [[72, 70], [1164, 70]].forEach(([x, y]) => {
+    ctx.fillStyle = palette.cap;
+    ctx.beginPath();
+    ctx.ellipse(x, y, 13, 32, 0.05, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  const wash = ctx.createLinearGradient(0, 90, 0, 390);
+  wash.addColorStop(0, palette.washStart);
+  wash.addColorStop(1, palette.washEnd);
+  ctx.fillStyle = wash;
+  [
+    [125, 125, 190, 55, -0.08],
+    [335, 125, 250, 72, 0.1],
+    [650, 148, 315, 82, -0.05],
+    [940, 122, 230, 58, 0.07],
+    [235, 222, 260, 78, 0.04],
+    [560, 250, 230, 70, -0.1],
+    [835, 225, 260, 75, 0.08],
+  ].forEach(([x, y, rx, ry, angle]) => {
+    ctx.beginPath();
+    ctx.ellipse(x, y, rx, ry, angle, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  ctx.restore();
+}
+
+function drawFramePreset(
+  ctx: CanvasRenderingContext2D,
+  frame: FrameId,
+  watercolorFrameColor: WatercolorFrameColorId,
+) {
   const left = 64;
   const top = 64;
   const right = PIECE_WIDTH - 64;
@@ -389,6 +526,12 @@ function drawFramePreset(ctx: CanvasRenderingContext2D, frame: FrameId) {
   ctx.save();
   ctx.lineCap = "round";
   ctx.globalAlpha = 0.82;
+
+  if (frame === "waterblue") {
+    drawWatercolorLineFrame(ctx, watercolorFrameColor);
+    ctx.restore();
+    return;
+  }
 
   if (frame === "double") {
     ctx.strokeStyle = "#9dac97";
@@ -554,7 +697,26 @@ export function renderPiece(
   }
 
   if (template === "frame") {
-    drawFramePreset(ctx, settings.frame);
+    drawFramePreset(ctx, settings.frame, settings.watercolorFrameColor);
+    if (settings.frame === "waterblue") {
+      ctx.save();
+      ctx.fillStyle = "rgba(171,128,78,.18)";
+      ctx.beginPath();
+      ctx.ellipse(250, 1515, 220, 48, 0.06, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(245, 1365, 220, 190, -0.1, 0, Math.PI * 2);
+      ctx.clip();
+      drawSource(ctx, image, 64, 1168, 392, 392, settings, 0.94);
+      ctx.restore();
+
+      if (settings.lineStyle !== "none") drawLines(ctx, 190, 430, 860, 9, 106, settings.lineStyle);
+      drawMessage(ctx, settings.message, 190, 345, 860);
+      return;
+    }
     drawSource(ctx, image, 100, 90, PIECE_WIDTH - 200, 400, settings, 0.92);
     ctx.fillStyle = "rgba(255,255,255,.52)";
     const fade = ctx.createLinearGradient(0, 300, 0, 540);
