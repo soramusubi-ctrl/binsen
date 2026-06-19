@@ -7,6 +7,7 @@ import {
   EditorSettings,
   FrameId,
   LineStyleId,
+  ScatterCount,
   ScatterShapeId,
   renderA4,
   renderPiece,
@@ -58,6 +59,12 @@ const scatterShapes: Array<{ id: ScatterShapeId; name: string }> = [
   { id: "stamp", name: "切手風" },
 ];
 
+const scatterCounts: Array<{ value: ScatterCount; name: string; caption: string }> = [
+  { value: 3, name: "少なめ", caption: "3個" },
+  { value: 5, name: "標準", caption: "5個" },
+  { value: 8, name: "にぎやか", caption: "8個" },
+];
+
 const initialSettings: EditorSettings = {
   brightness: 105,
   cleanup: 18,
@@ -69,6 +76,7 @@ const initialSettings: EditorSettings = {
   lineStyle: "solid",
   watermarkOpacity: 32,
   scatterShape: "cloud",
+  scatterCount: 3,
   message: "",
   frame: "leaves",
 };
@@ -292,6 +300,23 @@ export function LetterMaker() {
                     >
                       <span />
                       <b>{shape.name}</b>
+                    </button>
+                  ))}
+                </div>
+                <div className="scatter-count-heading">
+                  <strong>散りばめる数</strong>
+                  <small>余白を残して配置します</small>
+                </div>
+                <div className="scatter-count-grid">
+                  {scatterCounts.map((count) => (
+                    <button
+                      key={count.value}
+                      className={settings.scatterCount === count.value ? "scatter-count selected" : "scatter-count"}
+                      onClick={() => updateSetting("scatterCount", count.value)}
+                      aria-pressed={settings.scatterCount === count.value}
+                    >
+                      <b>{count.name}</b>
+                      <span>{count.caption}</span>
                     </button>
                   ))}
                 </div>

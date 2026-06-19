@@ -12,6 +12,7 @@ export type FrameId =
   | "stars";
 export type LineStyleId = "solid" | "dashed" | "double" | "handdrawn" | "dots";
 export type ScatterShapeId = "square" | "circle" | "oval" | "cloud" | "stamp";
+export type ScatterCount = 3 | 5 | 8;
 
 export type EditorSettings = {
   brightness: number;
@@ -24,6 +25,7 @@ export type EditorSettings = {
   lineStyle: LineStyleId;
   watermarkOpacity: number;
   scatterShape: ScatterShapeId;
+  scatterCount: ScatterCount;
   message: string;
   frame: FrameId;
 };
@@ -257,6 +259,23 @@ function drawScatterSource(
   ctx.stroke();
   ctx.restore();
 }
+
+const scatterPlacements: Array<{
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  alpha: number;
+}> = [
+  { x: 790, y: 65, width: 380, height: 330, alpha: 0.82 },
+  { x: 42, y: 1260, width: 310, height: 410, alpha: 0.64 },
+  { x: 940, y: 1375, width: 225, height: 245, alpha: 0.5 },
+  { x: 72, y: 80, width: 210, height: 185, alpha: 0.48 },
+  { x: 1020, y: 705, width: 150, height: 135, alpha: 0.38 },
+  { x: 50, y: 760, width: 145, height: 130, alpha: 0.34 },
+  { x: 525, y: 1485, width: 180, height: 155, alpha: 0.34 },
+  { x: 475, y: 90, width: 165, height: 145, alpha: 0.3 },
+];
 
 function drawLines(
   ctx: CanvasRenderingContext2D,
@@ -548,9 +567,18 @@ export function renderPiece(
   }
 
   if (template === "scatter") {
-    drawScatterSource(ctx, image, 790, 65, 380, 330, settings, 0.82);
-    drawScatterSource(ctx, image, 42, 1260, 310, 410, settings, 0.64);
-    drawScatterSource(ctx, image, 940, 1375, 225, 245, settings, 0.5);
+    scatterPlacements.slice(0, settings.scatterCount).forEach((placement) => {
+      drawScatterSource(
+        ctx,
+        image,
+        placement.x,
+        placement.y,
+        placement.width,
+        placement.height,
+        settings,
+        placement.alpha,
+      );
+    });
     if (settings.showLines) drawLines(ctx, 145, 300, 900, 11, 105, settings.lineStyle);
     drawMessage(ctx, settings.message, 145, 210, 900);
   }
