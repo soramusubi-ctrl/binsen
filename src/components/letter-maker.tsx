@@ -7,6 +7,7 @@ import {
   EditorSettings,
   FrameId,
   LineStyleId,
+  ScatterShapeId,
   renderA4,
   renderPiece,
   TemplateId,
@@ -49,6 +50,14 @@ const lineStyles: Array<{ id: LineStyleId; name: string }> = [
   { id: "dots", name: "ドット" },
 ];
 
+const scatterShapes: Array<{ id: ScatterShapeId; name: string }> = [
+  { id: "square", name: "角丸" },
+  { id: "circle", name: "丸抜き" },
+  { id: "oval", name: "楕円" },
+  { id: "cloud", name: "雲形" },
+  { id: "stamp", name: "切手風" },
+];
+
 const initialSettings: EditorSettings = {
   brightness: 105,
   cleanup: 18,
@@ -59,6 +68,7 @@ const initialSettings: EditorSettings = {
   showLines: true,
   lineStyle: "solid",
   watermarkOpacity: 32,
+  scatterShape: "cloud",
   message: "",
   frame: "leaves",
 };
@@ -261,6 +271,27 @@ export function LetterMaker() {
                     >
                       <span><i /><i /><i /></span>
                       <b>{frame.name}</b>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {template === "scatter" && (
+              <div className="scatter-shape-picker">
+                <div className="frame-picker-heading">
+                  <strong>絵の切り抜き形</strong>
+                  <small>5種類</small>
+                </div>
+                <div className="scatter-shape-grid">
+                  {scatterShapes.map((shape) => (
+                    <button
+                      key={shape.id}
+                      className={settings.scatterShape === shape.id ? `scatter-shape ${shape.id} selected` : `scatter-shape ${shape.id}`}
+                      onClick={() => updateSetting("scatterShape", shape.id)}
+                      aria-pressed={settings.scatterShape === shape.id}
+                    >
+                      <span />
+                      <b>{shape.name}</b>
                     </button>
                   ))}
                 </div>

@@ -11,6 +11,7 @@ export type FrameId =
   | "corner"
   | "stars";
 export type LineStyleId = "solid" | "dashed" | "double" | "handdrawn" | "dots";
+export type ScatterShapeId = "square" | "circle" | "oval" | "cloud" | "stamp";
 
 export type EditorSettings = {
   brightness: number;
@@ -22,6 +23,7 @@ export type EditorSettings = {
   showLines: boolean;
   lineStyle: LineStyleId;
   watermarkOpacity: number;
+  scatterShape: ScatterShapeId;
   message: string;
   frame: FrameId;
 };
@@ -172,6 +174,87 @@ function drawSource(
   } else {
     drawSampleArt(ctx, x, y, width, height);
   }
+  ctx.restore();
+}
+
+function buildScatterShapePath(
+  ctx: CanvasRenderingContext2D,
+  shape: ScatterShapeId,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  ctx.beginPath();
+  if (shape === "circle") {
+    ctx.arc(x + width / 2, y + height / 2, Math.min(width, height) / 2, 0, Math.PI * 2);
+    return;
+  }
+  if (shape === "oval") {
+    ctx.ellipse(x + width / 2, y + height / 2, width / 2, height / 2, 0, 0, Math.PI * 2);
+    return;
+  }
+  if (shape === "cloud") {
+    const bumps = 18;
+    const cx = x + width / 2;
+    const cy = y + height / 2;
+    for (let i = 0; i <= bumps; i += 1) {
+      const angle = (Math.PI * 2 * i) / bumps;
+      const radius = 1 + 0.12 * Math.sin(i * 2.4) + 0.08 * Math.cos(i * 3.1);
+      const px = cx + Math.cos(angle) * (width / 2) * radius;
+      const py = cy + Math.sin(angle) * (height / 2) * radius;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.quadraticCurveTo(
+        cx + Math.cos(angle - Math.PI / bumps) * (width / 2) * (radius + 0.08),
+        cy + Math.sin(angle - Math.PI / bumps) * (height / 2) * (radius + 0.08),
+        px,
+        py,
+      );
+    }
+    ctx.closePath();
+    return;
+  }
+  if (shape === "stamp") {
+    const radius = 22;
+    roundedRect(ctx, x, y, width, height, radius);
+    return;
+  }
+  roundedRect(ctx, x, y, width, height, 18);
+}
+
+function drawScatterSource(
+  ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement | null,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  settings: EditorSettings,
+  alpha: number,
+) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.shadowColor = "rgba(112,92,70,.12)";
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 8;
+  ctx.fillStyle = "#ffffff";
+  buildScatterShapePath(ctx, settings.scatterShape, x, y, width, height);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  buildScatterShapePath(ctx, settings.scatterShape, x, y, width, height);
+  ctx.clip();
+  drawSource(ctx, image, x, y, width, height, settings, alpha);
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = settings.scatterShape === "stamp" ? "#d9c8b0" : "rgba(255,255,255,.9)";
+  ctx.lineWidth = settings.scatterShape === "stamp" ? 4 : 7;
+  if (settings.scatterShape === "stamp") ctx.setLineDash([12, 9]);
+  buildScatterShapePath(ctx, settings.scatterShape, x, y, width, height);
+  ctx.stroke();
   ctx.restore();
 }
 
@@ -465,9 +548,9 @@ export function renderPiece(
   }
 
   if (template === "scatter") {
-    drawSource(ctx, image, 790, 65, 380, 330, settings, 0.82);
-    drawSource(ctx, image, 42, 1260, 310, 410, settings, 0.64);
-    drawSource(ctx, image, 940, 1375, 225, 245, settings, 0.5);
+    drawScatterSource(ctx, image, 790, 65, 380, 330, settings, 0.82);
+    drawScatterSource(ctx, image, 42, 1260, 310, 410, settings, 0.64);
+    drawScatterSource(ctx, image, 940, 1375, 225, 245, settings, 0.5);
     if (settings.showLines) drawLines(ctx, 145, 300, 900, 11, 105, settings.lineStyle);
     drawMessage(ctx, settings.message, 145, 210, 900);
   }
