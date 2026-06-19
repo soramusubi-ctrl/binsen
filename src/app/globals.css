@@ -299,9 +299,30 @@ button { color: inherit; }
 
 footer { min-height: 150px; padding: 20px 24px 0; display: flex; justify-content: center; align-items: end; gap: 0; overflow: hidden; color: var(--muted); border-top: 1px solid rgba(153,134,108,.2); font-family: "Yu Mincho", serif; font-size: 11px; }
 footer p { align-self: center; position: relative; z-index: 1; margin: 0 -28px 24px; padding: 10px 30px; border-radius: 999px; background: rgba(255,253,248,.82); white-space: nowrap; }
+footer a { margin-left: 12px; color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
 .footer-flower { width: min(30vw, 300px); height: auto; object-fit: contain; }
 .footer-flower-right { transform: translateX(-4px); }
 footer strong { color: var(--green); letter-spacing: .1em; }
+
+.policy-page { min-height: 100vh; padding: clamp(24px, 5vw, 64px) 18px; }
+.policy-paper {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 58px);
+  border: 1px solid rgba(170,150,123,.28);
+  border-radius: 24px;
+  background: rgba(255,253,248,.95);
+  box-shadow: var(--shadow);
+}
+.policy-back { display: inline-block; margin-bottom: 28px; color: var(--green); font-size: 13px; text-decoration: none; }
+.policy-back:hover { text-decoration: underline; text-underline-offset: 4px; }
+.policy-paper h1 { margin: 0; font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: clamp(28px, 5vw, 44px); font-weight: 500; letter-spacing: .08em; }
+.policy-lead { margin: 18px 0 34px; color: var(--muted); line-height: 2; }
+.policy-sections { display: grid; gap: 24px; }
+.policy-sections section { padding-top: 22px; border-top: 1px solid var(--line); }
+.policy-sections h2 { margin: 0 0 10px; color: var(--green); font-family: "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: 20px; font-weight: 600; letter-spacing: .08em; }
+.policy-sections p { margin: 0 0 10px; color: var(--ink); line-height: 2; font-size: 14px; }
+.policy-date { margin: 32px 0 0; color: var(--muted); font-size: 12px; text-align: right; }
 
 @media (max-width: 860px) {
   .hero { align-items: start; flex-direction: column; padding-top: 36px; }
@@ -348,6 +369,7 @@ footer strong { color: var(--green); letter-spacing: .1em; }
   .adjustments { grid-template-columns: 1fr; }
   .rotation-row { grid-column: auto; }
   footer { min-height: 110px; padding: 14px 4px 0; }
-  footer p { margin: 0 -42px 20px; padding: 7px 15px; font-size: 9px; }
+  footer p { margin: 0 -42px 20px; padding: 7px 15px; font-size: 9px; white-space: normal; text-align: center; }
+  footer a { display: block; margin: 4px 0 0; }
   .footer-flower { width: 42vw; }
 }

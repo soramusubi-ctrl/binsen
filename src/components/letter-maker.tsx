@@ -2,6 +2,7 @@
 
 import { ChangeEvent, useRef, useState } from "react";
 import NextImage from "next/image";
+import Link from "next/link";
 import {
   downloadCanvas,
   EditorSettings,
@@ -386,7 +387,7 @@ export function LetterMaker() {
 
       <footer>
         <NextImage className="footer-flower footer-flower-left" src="/assets/footer-left.png" alt="" width={320} height={180} />
-        <p><strong>えから便り</strong> 手書きの絵を、日々の便りに。</p>
+        <p><strong>えから便り</strong> 手書きの絵を、日々の便りに。<Link href="/privacy">プライバシー・免責事項</Link></p>
         <NextImage className="footer-flower footer-flower-right" src="/assets/footer-right.png" alt="" width={320} height={180} />
       </footer>
     </main>
