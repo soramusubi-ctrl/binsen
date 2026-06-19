@@ -10,7 +10,7 @@ export type FrameId =
   | "double"
   | "corner"
   | "stars";
-export type LineStyleId = "solid" | "dashed" | "double" | "handdrawn" | "dots";
+export type LineStyleId = "none" | "solid" | "dashed" | "double" | "handdrawn" | "dots";
 export type ScatterShapeId = "square" | "circle" | "oval" | "cloud" | "stamp";
 export type ScatterCount = 3 | 5 | 8;
 
@@ -549,7 +549,7 @@ export function renderPiece(
     drawSource(ctx, image, 0, 0, PIECE_WIDTH, PIECE_HEIGHT, settings, sourceOpacity);
     ctx.fillStyle = `rgba(255,255,255,${Math.max(0.18, 0.62 - settings.watermarkOpacity / 120)})`;
     ctx.fillRect(0, 0, PIECE_WIDTH, PIECE_HEIGHT);
-    if (settings.showLines) drawLines(ctx, 120, 210, 1000, 14, 94, settings.lineStyle);
+    if (settings.lineStyle !== "none") drawLines(ctx, 120, 210, 1000, 14, 94, settings.lineStyle);
     drawMessage(ctx, settings.message, 120, 130, 1000);
   }
 
@@ -562,7 +562,7 @@ export function renderPiece(
     fade.addColorStop(1, paper);
     ctx.fillStyle = fade;
     ctx.fillRect(90, 300, PIECE_WIDTH - 180, 250);
-    if (settings.showLines) drawLines(ctx, 145, 620, 950, 9, 100, settings.lineStyle);
+    if (settings.lineStyle !== "none") drawLines(ctx, 145, 620, 950, 9, 100, settings.lineStyle);
     drawMessage(ctx, settings.message, 145, 545, 950);
   }
 
@@ -579,7 +579,7 @@ export function renderPiece(
         placement.alpha,
       );
     });
-    if (settings.showLines) drawLines(ctx, 145, 300, 900, 11, 105, settings.lineStyle);
+    if (settings.lineStyle !== "none") drawLines(ctx, 145, 300, 900, 11, 105, settings.lineStyle);
     drawMessage(ctx, settings.message, 145, 210, 900);
   }
 

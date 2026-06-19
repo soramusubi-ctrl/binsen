@@ -44,6 +44,7 @@ const frames: Array<{ id: FrameId; name: string }> = [
 ];
 
 const lineStyles: Array<{ id: LineStyleId; name: string }> = [
+  { id: "none", name: "なし" },
   { id: "solid", name: "標準線" },
   { id: "dashed", name: "点線" },
   { id: "double", name: "二重線" },
@@ -322,17 +323,20 @@ export function LetterMaker() {
                 </div>
               </div>
             )}
-            <label className="switch-row">
-              <span><strong>罫線を入れる</strong><small>手書きしやすい薄い線</small></span>
-              <input type="checkbox" checked={settings.showLines} onChange={(e) => updateSetting("showLines", e.target.checked)} />
-            </label>
-            {settings.showLines && (
+            <div className="line-section">
+              <div className="line-heading">
+                <strong>罫線</strong>
+                <small>なしも選べます</small>
+              </div>
               <div className="line-picker">
                 {lineStyles.map((line) => (
                   <button
                     key={line.id}
                     className={settings.lineStyle === line.id ? `line-choice ${line.id} selected` : `line-choice ${line.id}`}
-                    onClick={() => updateSetting("lineStyle", line.id)}
+                    onClick={() => {
+                      updateSetting("lineStyle", line.id);
+                      updateSetting("showLines", line.id !== "none");
+                    }}
                     aria-pressed={settings.lineStyle === line.id}
                   >
                     <span><i /></span>
@@ -340,7 +344,7 @@ export function LetterMaker() {
                   </button>
                 ))}
               </div>
-            )}
+            </div>
             <label className="message-field">
               <span><strong>文字を入れる</strong> <small>なくてもOK</small></span>
               <textarea
