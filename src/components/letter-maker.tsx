@@ -176,11 +176,15 @@ export function LetterMaker() {
           <p>手書きの絵を選んで、好きな形に整えるだけ。<br />A4用紙から、小さな便箋が4枚できあがります。</p>
         </div>
         <div className="hero-side">
-          <div className="hero-thumbnail" aria-hidden="true">
-            <span className="thumb-flower" />
-            <span className="thumb-line" />
-            <span className="thumb-line" />
-            <span className="thumb-line short" />
+          <div className="hero-thumbnail">
+            <NextImage
+              src="/assets/hero-watermark-sample.jpg"
+              alt="透かし便箋をA4に4分割した出力例"
+              width={707}
+              height={1000}
+              priority
+            />
+            <span>A4 4面付け</span>
           </div>
           <div className="steps" aria-label="使い方">
             <span className="active"><b>1</b>絵を選ぶ</span><i />

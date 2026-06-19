@@ -65,47 +65,29 @@ button { color: inherit; }
   width: min(28vw, 230px);
   min-width: 180px;
   aspect-ratio: .72;
-  padding: 28px 26px;
+  padding: 8px;
   border: 1px solid #d7cbbb;
   border-radius: 12px;
   background: #fff;
   box-shadow: 0 18px 36px rgba(94, 75, 52, .12), inset 0 0 0 10px #fffdf8;
   transform: rotate(1.6deg);
+  overflow: hidden;
 }
-.hero-thumbnail::before,
-.hero-thumbnail::after {
-  content: "";
+.hero-thumbnail img { display: block; width: 100%; height: 100%; border-radius: 7px; object-fit: cover; }
+.hero-thumbnail span {
   position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  padding: 5px 10px;
   border-radius: 999px;
-  background: rgba(111, 132, 109, .16);
+  color: var(--green);
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 4px 10px rgba(94,75,52,.08);
+  white-space: nowrap;
+  font-size: 9px;
+  font-weight: 700;
 }
-.hero-thumbnail::before { width: 72px; height: 72px; right: 22px; top: 24px; }
-.hero-thumbnail::after { width: 54px; height: 54px; left: 24px; bottom: 26px; background: rgba(219, 119, 119, .13); }
-.thumb-flower {
-  position: absolute;
-  right: 42px;
-  top: 56px;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 50%, #d5a454 0 9%, transparent 10%),
-    radial-gradient(ellipse at 50% 18%, #e8b6aa 0 22%, transparent 23%),
-    radial-gradient(ellipse at 82% 48%, #e8b6aa 0 22%, transparent 23%),
-    radial-gradient(ellipse at 50% 82%, #e8b6aa 0 22%, transparent 23%),
-    radial-gradient(ellipse at 18% 48%, #e8b6aa 0 22%, transparent 23%);
-  opacity: .78;
-}
-.thumb-line {
-  position: relative;
-  z-index: 1;
-  display: block;
-  width: 100%;
-  margin-top: 66px;
-  border-top: 1px solid #d4c8b8;
-}
-.thumb-line + .thumb-line { margin-top: 28px; }
-.thumb-line.short { width: 72%; }
 
 .steps { display: flex; align-items: center; white-space: nowrap; margin-bottom: 8px; }
 .steps span { display: flex; flex-direction: column; align-items: center; gap: 5px; color: #9d9284; font-size: 10px; }
@@ -337,8 +319,7 @@ footer strong { color: var(--green); letter-spacing: .1em; }
   .hero { padding: 24px 16px 18px; gap: 20px; }
   .hero h1 { font-size: 27px; line-height: 1.5; }
   .hero-thumbnail { width: 150px; padding: 20px 18px; }
-  .thumb-line { margin-top: 48px; }
-  .thumb-line + .thumb-line { margin-top: 22px; }
+  .hero-thumbnail { padding: 6px; }
   .hero > div > p:last-child { font-size: 11px; }
   .workspace { padding: 0 10px; gap: 12px; margin-bottom: 50px; }
   .empty-artwork-upload { min-height: 230px; }
