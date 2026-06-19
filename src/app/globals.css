@@ -234,6 +234,8 @@ button { color: inherit; }
 .frame-choice.waterblue i:nth-child(1) { left: 5px; right: 5px; top: 4px; width: auto; height: 3px; }
 .frame-choice.waterblue i:nth-child(2) { left: 5px; top: 4px; bottom: 4px; width: 3px; height: auto; }
 .frame-choice.waterblue i:nth-child(3) { right: 5px; top: 4px; bottom: 4px; width: 3px; height: auto; }
+.motif-generate-button { width: 100%; margin-top: 10px; padding: 9px 12px; border: 1px dashed #c9bba8; border-radius: 12px; background: #fffdfa; color: var(--brown); font-size: 11px; cursor: pointer; }
+.motif-generate-button:hover { border-color: #96a88c; background: #f5f8f1; }
 .watercolor-color-picker { margin-top: 12px; }
 .watercolor-color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .watercolor-color { padding: 6px 3px; display: grid; gap: 4px; place-items: center; border: 1px solid var(--line); border-radius: 9px; background: #fffdfa; cursor: pointer; }

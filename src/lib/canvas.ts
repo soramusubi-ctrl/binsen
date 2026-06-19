@@ -31,6 +31,7 @@ export type EditorSettings = {
   message: string;
   frame: FrameId;
   watercolorFrameColor: WatercolorFrameColorId;
+  frameMotifSeed: number;
 };
 
 export const PIECE_WIDTH = 1240;
@@ -82,6 +83,25 @@ const watercolorFramePalettes: Record<
     washEnd: "rgba(181,160,207,0)",
   },
 };
+
+function createSeededRandom(seed: number) {
+  let state = Math.imul(seed ^ 0x9e3779b9, 0x85ebca6b) >>> 0;
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let next = state;
+    next = Math.imul(next ^ (next >>> 15), next | 1);
+    next ^= next + Math.imul(next ^ (next >>> 7), next | 61);
+    return ((next ^ (next >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function jitter(random: () => number, amount: number) {
+  return (random() * 2 - 1) * amount;
+}
+
+function pick<T>(random: () => number, values: T[]) {
+  return values[Math.floor(random() * values.length)];
+}
 
 function roundedRect(
   ctx: CanvasRenderingContext2D,
@@ -446,7 +466,11 @@ function drawWatercolorStroke(
   ctx.restore();
 }
 
-function drawWatercolorLineFrame(ctx: CanvasRenderingContext2D, colorId: WatercolorFrameColorId) {
+function drawWatercolorLineFrame(
+  ctx: CanvasRenderingContext2D,
+  colorId: WatercolorFrameColorId,
+  random: () => number,
+) {
   const palette = watercolorFramePalettes[colorId];
   ctx.save();
 
@@ -458,7 +482,13 @@ function drawWatercolorLineFrame(ctx: CanvasRenderingContext2D, colorId: Waterco
   topLines.forEach((line, index) => {
     drawWatercolorStroke(
       ctx,
-      [[74, line.y + index * 2], [330, line.y - 8], [610, line.y + 1], [905, line.y - 5], [1164, line.y + 4]],
+      [
+        [74, line.y + index * 2 + jitter(random, 4)],
+        [330, line.y - 8 + jitter(random, 8)],
+        [610, line.y + 1 + jitter(random, 7)],
+        [905, line.y - 5 + jitter(random, 8)],
+        [1164, line.y + 4 + jitter(random, 4)],
+      ],
       palette.strong,
       line.width,
       line.alpha,
@@ -472,14 +502,25 @@ function drawWatercolorLineFrame(ctx: CanvasRenderingContext2D, colorId: Waterco
   sides.forEach(({ x, sign }) => {
     drawWatercolorStroke(
       ctx,
-      [[x, 82], [x + sign * 8, 410], [x + sign * 3, 800], [x + sign * 10, 1210], [x + sign * 2, 1678]],
+      [
+        [x + jitter(random, 4), 82],
+        [x + sign * (8 + jitter(random, 5)), 410],
+        [x + sign * (3 + jitter(random, 6)), 800],
+        [x + sign * (10 + jitter(random, 6)), 1210],
+        [x + sign * (2 + jitter(random, 4)), 1678],
+      ],
       palette.strong,
       15,
       0.34,
     );
     drawWatercolorStroke(
       ctx,
-      [[x + sign * 13, 86], [x + sign * 4, 510], [x + sign * 16, 1040], [x + sign * 8, 1666]],
+      [
+        [x + sign * 13 + jitter(random, 3), 86],
+        [x + sign * 4 + jitter(random, 5), 510],
+        [x + sign * 16 + jitter(random, 5), 1040],
+        [x + sign * 8 + jitter(random, 3), 1666],
+      ],
       palette.pale,
       7,
       0.28,
@@ -507,7 +548,7 @@ function drawWatercolorLineFrame(ctx: CanvasRenderingContext2D, colorId: Waterco
     [835, 225, 260, 75, 0.08],
   ].forEach(([x, y, rx, ry, angle]) => {
     ctx.beginPath();
-    ctx.ellipse(x, y, rx, ry, angle, 0, Math.PI * 2);
+    ctx.ellipse(x + jitter(random, 24), y + jitter(random, 16), rx + jitter(random, 28), ry + jitter(random, 12), angle + jitter(random, 0.08), 0, Math.PI * 2);
     ctx.fill();
   });
 
@@ -518,17 +559,19 @@ function drawFramePreset(
   ctx: CanvasRenderingContext2D,
   frame: FrameId,
   watercolorFrameColor: WatercolorFrameColorId,
+  frameMotifSeed: number,
 ) {
   const left = 64;
   const top = 64;
   const right = PIECE_WIDTH - 64;
   const bottom = PIECE_HEIGHT - 64;
+  const random = createSeededRandom(frameMotifSeed + frame.length * 101);
   ctx.save();
   ctx.lineCap = "round";
   ctx.globalAlpha = 0.82;
 
   if (frame === "waterblue") {
-    drawWatercolorLineFrame(ctx, watercolorFrameColor);
+    drawWatercolorLineFrame(ctx, watercolorFrameColor, random);
     ctx.restore();
     return;
   }
@@ -552,25 +595,39 @@ function drawFramePreset(
   }
 
   if (frame === "leaves") {
-    drawLeafAccent(ctx, 98, 1450);
-    drawLeafAccent(ctx, 1140, 1450, true);
-    drawLeafAccent(ctx, 98, 170);
-    drawLeafAccent(ctx, 1140, 170, true);
+    [[98, 1450, false], [1140, 1450, true], [98, 170, false], [1140, 170, true]].forEach(([x, y, flip]) => {
+      ctx.save();
+      ctx.translate(Number(x) + jitter(random, 18), Number(y) + jitter(random, 24));
+      ctx.scale(0.9 + random() * 0.22, 0.9 + random() * 0.22);
+      drawLeafAccent(ctx, 0, 0, Boolean(flip));
+      ctx.restore();
+    });
   }
 
   if (frame === "flowers" || frame === "corner") {
     const points = frame === "corner"
       ? [[112, 120], [1128, 120], [112, 1634], [1128, 1634]]
       : [[150, 120], [300, 105], [940, 105], [1090, 120], [150, 1635], [1090, 1635]];
-    points.forEach(([x, y], index) => drawTinyFlower(ctx, x, y, index % 2 ? "#e6b7a8" : "#d89ba6", frame === "corner" ? 20 : 13));
+    const colors = ["#e6b7a8", "#d89ba6", "#e8c27b", "#b9c8a8", "#cdb9d7"];
+    points.forEach(([x, y], index) => {
+      drawTinyFlower(
+        ctx,
+        x + jitter(random, frame === "corner" ? 18 : 28),
+        y + jitter(random, frame === "corner" ? 18 : 20),
+        pick(random, colors),
+        (frame === "corner" ? 18 : 12) + random() * (frame === "corner" ? 7 : 5) + (index % 2),
+      );
+    });
   }
 
   if (frame === "mimosa") {
     ctx.fillStyle = "#dfb84e";
-    for (let y = 135; y < 1630; y += 78) {
+    const step = 70 + random() * 18;
+    for (let y = 125 + jitter(random, 18); y < 1630; y += step) {
       [92, 1148].forEach((x, index) => {
+        ctx.fillStyle = index % 2 ? "#e6c665" : "#dfb84e";
         ctx.beginPath();
-        ctx.arc(x, y + (index ? 25 : 0), 10, 0, Math.PI * 2);
+        ctx.arc(x + jitter(random, 10), y + (index ? 25 : 0) + jitter(random, 14), 7 + random() * 6, 0, Math.PI * 2);
         ctx.fill();
       });
     }
@@ -579,15 +636,16 @@ function drawFramePreset(
   if (frame === "lavender") {
     ctx.strokeStyle = "#879578";
     ctx.lineWidth = 3;
-    for (let x = 105; x < 1160; x += 145) {
+    for (let x = 95 + jitter(random, 18); x < 1160; x += 125 + random() * 36) {
+      const stemTop = 1545 + jitter(random, 18);
       ctx.beginPath();
       ctx.moveTo(x, 1635);
-      ctx.lineTo(x + 18, 1555);
+      ctx.lineTo(x + 18 + jitter(random, 8), stemTop);
       ctx.stroke();
       for (let i = 0; i < 4; i += 1) {
-        ctx.fillStyle = i % 2 ? "#9b91b0" : "#b5a7c1";
+        ctx.fillStyle = pick(random, ["#9b91b0", "#b5a7c1", "#8f84a8"]);
         ctx.beginPath();
-        ctx.ellipse(x + 10 + i * 3, 1570 + i * 16, 10, 5, -0.6, 0, Math.PI * 2);
+        ctx.ellipse(x + 10 + i * 3 + jitter(random, 4), stemTop + 14 + i * 16 + jitter(random, 5), 8 + random() * 5, 4 + random() * 3, -0.6 + jitter(random, 0.18), 0, Math.PI * 2);
         ctx.fill();
       }
     }
@@ -596,10 +654,10 @@ function drawFramePreset(
   if (frame === "berries") {
     const points = [[105, 115], [1135, 115], [105, 1638], [1135, 1638]];
     points.forEach(([x, y]) => {
-      ctx.fillStyle = "#bb7f72";
+      ctx.fillStyle = pick(random, ["#bb7f72", "#c68d7d", "#a96766"]);
       [[0, 0], [22, 8], [8, 24]].forEach(([dx, dy]) => {
         ctx.beginPath();
-        ctx.arc(x + dx, y + dy, 10, 0, Math.PI * 2);
+        ctx.arc(x + dx + jitter(random, 8), y + dy + jitter(random, 8), 8 + random() * 5, 0, Math.PI * 2);
         ctx.fill();
       });
     });
@@ -609,20 +667,20 @@ function drawFramePreset(
     ctx.strokeStyle = "#d78e91";
     ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.moveTo(510, 66);
-    ctx.quadraticCurveTo(620, 150, 730, 66);
+    ctx.moveTo(510 + jitter(random, 18), 66 + jitter(random, 8));
+    ctx.quadraticCurveTo(620 + jitter(random, 18), 150 + jitter(random, 20), 730 + jitter(random, 18), 66 + jitter(random, 8));
     ctx.stroke();
     ctx.beginPath();
-    ctx.ellipse(620, 82, 30, 18, 0, 0, Math.PI * 2);
+    ctx.ellipse(620 + jitter(random, 12), 82 + jitter(random, 8), 26 + random() * 12, 15 + random() * 7, jitter(random, 0.2), 0, Math.PI * 2);
     ctx.stroke();
   }
 
   if (frame === "dots") {
     const colors = ["#dca098", "#e6c56f", "#9eae91", "#b8a6bd"];
     for (let i = 0; i < 24; i += 1) {
-      ctx.fillStyle = colors[i % colors.length];
+      ctx.fillStyle = pick(random, colors);
       ctx.beginPath();
-      ctx.arc(85 + i * 46, i % 2 ? 92 : 1660, 6 + (i % 3), 0, Math.PI * 2);
+      ctx.arc(85 + i * 46 + jitter(random, 12), (i % 2 ? 92 : 1660) + jitter(random, 12), 5 + random() * 6, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -630,10 +688,11 @@ function drawFramePreset(
   if (frame === "stars") {
     ctx.fillStyle = "#d4af56";
     [[105, 110], [1135, 110], [105, 1640], [1135, 1640], [620, 85]].forEach(([x, y]) => {
+      const size = 13 + random() * 10;
       ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(Math.PI / 4);
-      ctx.fillRect(-9, -9, 18, 18);
+      ctx.translate(x + jitter(random, 20), y + jitter(random, 16));
+      ctx.rotate(Math.PI / 4 + jitter(random, 0.35));
+      ctx.fillRect(-size / 2, -size / 2, size, size);
       ctx.restore();
     });
   }
@@ -697,7 +756,7 @@ export function renderPiece(
   }
 
   if (template === "frame") {
-    drawFramePreset(ctx, settings.frame, settings.watercolorFrameColor);
+    drawFramePreset(ctx, settings.frame, settings.watercolorFrameColor, settings.frameMotifSeed);
     if (settings.frame === "waterblue") {
       ctx.save();
       ctx.fillStyle = "rgba(171,128,78,.18)";

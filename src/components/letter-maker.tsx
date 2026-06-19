@@ -92,6 +92,7 @@ const initialSettings: EditorSettings = {
   message: "",
   frame: "leaves",
   watercolorFrameColor: "blue",
+  frameMotifSeed: 1,
 };
 
 function LeafMark() {
@@ -307,6 +308,12 @@ export function LetterMaker() {
                     </button>
                   ))}
                 </div>
+                <button
+                  className="motif-generate-button"
+                  onClick={() => updateSetting("frameMotifSeed", Date.now())}
+                >
+                  モチーフを作り直す
+                </button>
                 {settings.frame === "waterblue" && (
                   <div className="watercolor-color-picker">
                     <div className="frame-picker-heading">
