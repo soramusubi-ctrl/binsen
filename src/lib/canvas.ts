@@ -39,8 +39,8 @@ export const PIECE_WIDTH = 1240;
 export const PIECE_HEIGHT = 1754;
 export const A4_WIDTH = 2480;
 export const A4_HEIGHT = 3508;
-export const NOTE_WIDTH = A4_WIDTH / 2;
-export const NOTE_HEIGHT = A4_HEIGHT / 4;
+export const NOTE_WIDTH = A4_WIDTH / 4;
+export const NOTE_HEIGHT = A4_HEIGHT / 2;
 
 const ink = "#73675a";
 const paleInk = "#b7aa98";
@@ -754,9 +754,9 @@ function drawFramePreset(
 }
 
 function getNotePointBounds(position: OnePointPositionId) {
-  if (position === "top-left") return { x: 54, y: 54, width: 190, height: 170 };
-  if (position === "bottom-center") return { x: 455, y: 660, width: 285, height: 150 };
-  return { x: 930, y: 610, width: 210, height: 195 };
+  if (position === "top-left") return { x: 44, y: 82, width: 175, height: 175 };
+  if (position === "bottom-center") return { x: 170, y: 1425, width: 280, height: 210 };
+  return { x: 390, y: 1365, width: 185, height: 245 };
 }
 
 function drawNoteOnePointArtwork(
@@ -860,10 +860,10 @@ export function renderNotePiece(
 
   ctx.strokeStyle = "rgba(130,116,97,.18)";
   ctx.lineWidth = 2;
-  roundedRect(ctx, 48, 42, NOTE_WIDTH - 96, NOTE_HEIGHT - 84, 20);
+  roundedRect(ctx, 34, 56, NOTE_WIDTH - 68, NOTE_HEIGHT - 112, 20);
   ctx.stroke();
-  drawVerticalLines(ctx, NOTE_WIDTH - 165, 112, NOTE_HEIGHT - 224, 9, 92, settings.lineStyle);
-  drawMessage(ctx, settings.message, 72, 62, 420);
+  drawVerticalLines(ctx, NOTE_WIDTH - 92, 130, NOTE_HEIGHT - 270, 5, 78, settings.lineStyle);
+  drawMessage(ctx, settings.message, 50, 70, 240);
 
   ctx.strokeStyle = "rgba(130,116,97,.16)";
   ctx.lineWidth = 2;
@@ -906,8 +906,8 @@ export function renderA4(
 
   if (template === "note") {
     renderNotePiece(piece, image, settings);
-    for (let row = 0; row < 4; row += 1) {
-      for (let col = 0; col < 2; col += 1) {
+    for (let row = 0; row < 2; row += 1) {
+      for (let col = 0; col < 4; col += 1) {
         ctx.drawImage(
           piece,
           col * NOTE_WIDTH * scale,
@@ -922,12 +922,12 @@ export function renderA4(
     ctx.lineWidth = Math.max(1, 2 * scale);
     ctx.setLineDash([14 * scale, 12 * scale]);
     ctx.beginPath();
-    ctx.moveTo(NOTE_WIDTH * scale, 0);
-    ctx.lineTo(NOTE_WIDTH * scale, A4_HEIGHT * scale);
-    for (let row = 1; row < 4; row += 1) {
-      ctx.moveTo(0, row * NOTE_HEIGHT * scale);
-      ctx.lineTo(A4_WIDTH * scale, row * NOTE_HEIGHT * scale);
+    for (let col = 1; col < 4; col += 1) {
+      ctx.moveTo(col * NOTE_WIDTH * scale, 0);
+      ctx.lineTo(col * NOTE_WIDTH * scale, A4_HEIGHT * scale);
     }
+    ctx.moveTo(0, NOTE_HEIGHT * scale);
+    ctx.lineTo(A4_WIDTH * scale, NOTE_HEIGHT * scale);
     ctx.stroke();
     ctx.restore();
     return;

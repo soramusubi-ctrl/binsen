@@ -23,7 +23,7 @@ const templates: Array<{ id: TemplateId; name: string; caption: string; mark: st
   { id: "watermark", name: "透かし便箋", caption: "絵をふんわり背景に", mark: "淡" },
   { id: "frame", name: "枠つき便箋", caption: "絵を上に、やさしい枠", mark: "枠" },
   { id: "point", name: "ワンポイント", caption: "絵を控えめに1箇所", mark: "点" },
-  { id: "note", name: "一筆箋", caption: "縦書き・A4 8分割", mark: "縦" },
+  { id: "note", name: "一筆箋", caption: "縦長・A4 8分割", mark: "縦" },
 ];
 
 const adjustmentTools = [
