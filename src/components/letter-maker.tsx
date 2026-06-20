@@ -8,10 +8,11 @@ import {
   EditorSettings,
   FrameId,
   LineStyleId,
-  ScatterCount,
+  OnePointPositionId,
   ScatterShapeId,
   WatercolorFrameColorId,
   renderA4,
+  renderNotePiece,
   renderPiece,
   TemplateId,
 } from "@/lib/canvas";
@@ -21,8 +22,8 @@ import { ArtworkPreview } from "@/components/artwork-preview";
 const templates: Array<{ id: TemplateId; name: string; caption: string; mark: string }> = [
   { id: "watermark", name: "透かし便箋", caption: "絵をふんわり背景に", mark: "淡" },
   { id: "frame", name: "枠つき便箋", caption: "絵を上に、やさしい枠", mark: "枠" },
-  { id: "scatter", name: "ちりばめ便箋", caption: "余白を残して軽やかに", mark: "散" },
-  { id: "card", name: "メッセージカード", caption: "短い言葉を添えて", mark: "札" },
+  { id: "point", name: "ワンポイント", caption: "絵を控えめに1箇所", mark: "点" },
+  { id: "note", name: "一筆箋", caption: "縦書き・A4 8分割", mark: "縦" },
 ];
 
 const adjustmentTools = [
@@ -71,10 +72,11 @@ const scatterShapes: Array<{ id: ScatterShapeId; name: string }> = [
   { id: "stamp", name: "切手風" },
 ];
 
-const scatterCounts: Array<{ value: ScatterCount; name: string; caption: string }> = [
-  { value: 3, name: "少なめ", caption: "3個" },
-  { value: 5, name: "標準", caption: "5個" },
-  { value: 8, name: "にぎやか", caption: "8個" },
+const onePointPositions: Array<{ id: OnePointPositionId; name: string; caption: string }> = [
+  { id: "bottom-right", name: "右下", caption: "書く場所を広く" },
+  { id: "top-left", name: "左上", caption: "冒頭の飾りに" },
+  { id: "bottom-center", name: "下中央", caption: "下端に小さく" },
+  { id: "watermark", name: "透かし", caption: "薄く背景に" },
 ];
 
 const initialSettings: EditorSettings = {
@@ -88,7 +90,8 @@ const initialSettings: EditorSettings = {
   lineStyle: "solid",
   watermarkOpacity: 32,
   scatterShape: "cloud",
-  scatterCount: 3,
+  onePointPosition: "bottom-right",
+  onePointOpacity: 58,
   message: "",
   frame: "leaves",
   watercolorFrameColor: "blue",
@@ -163,13 +166,14 @@ export function LetterMaker() {
   const saveA4 = () => {
     const canvas = document.createElement("canvas");
     renderA4(canvas, template, image, settings);
-    downloadCanvas(canvas, "えから便り_A4_4枚.png");
+    downloadCanvas(canvas, template === "note" ? "えから便り_A4_一筆箋8枚.png" : "えから便り_A4_4枚.png");
   };
 
   const saveOne = () => {
     const canvas = document.createElement("canvas");
-    renderPiece(canvas, template, image, settings);
-    downloadCanvas(canvas, "えから便り_1枚.png");
+    if (template === "note") renderNotePiece(canvas, image, settings);
+    else renderPiece(canvas, template, image, settings);
+    downloadCanvas(canvas, template === "note" ? "えから便り_一筆箋1枚.png" : "えから便り_1枚.png");
   };
 
   return (
@@ -337,7 +341,7 @@ export function LetterMaker() {
                 )}
               </div>
             )}
-            {template === "scatter" && (
+            {(template === "point" || template === "note") && (
               <div className="scatter-shape-picker">
                 <div className="frame-picker-heading">
                   <strong>絵の切り抜き形</strong>
@@ -357,21 +361,30 @@ export function LetterMaker() {
                   ))}
                 </div>
                 <div className="scatter-count-heading">
-                  <strong>散りばめる数</strong>
-                  <small>余白を残して配置します</small>
+                  <strong>配置位置</strong>
+                  <small>書き込み欄を邪魔しない位置</small>
                 </div>
                 <div className="scatter-count-grid">
-                  {scatterCounts.map((count) => (
+                  {onePointPositions.map((position) => (
                     <button
-                      key={count.value}
-                      className={settings.scatterCount === count.value ? "scatter-count selected" : "scatter-count"}
-                      onClick={() => updateSetting("scatterCount", count.value)}
-                      aria-pressed={settings.scatterCount === count.value}
+                      key={position.id}
+                      className={settings.onePointPosition === position.id ? "scatter-count selected" : "scatter-count"}
+                      onClick={() => updateSetting("onePointPosition", position.id)}
+                      aria-pressed={settings.onePointPosition === position.id}
                     >
-                      <b>{count.name}</b>
-                      <span>{count.caption}</span>
+                      <b>{position.name}</b>
+                      <span>{position.caption}</span>
                     </button>
                   ))}
+                </div>
+                <div className="onepoint-opacity">
+                  <RangeField
+                    label="絵の濃さ"
+                    value={settings.onePointOpacity}
+                    min={20}
+                    max={90}
+                    onChange={(v) => updateSetting("onePointOpacity", v)}
+                  />
                 </div>
               </div>
             )}
@@ -413,7 +426,7 @@ export function LetterMaker() {
         <section className="preview-area">
           <div className="preview-heading">
             <div><span className="leaf-dot">⌁</span><h2>できあがり</h2></div>
-            <p>A4縦・4面付け</p>
+            <p>{template === "note" ? "A4縦・8面付け" : "A4縦・4面付け"}</p>
           </div>
           <PaperPreview template={template} image={image} settings={settings} />
           <div className="save-panel">

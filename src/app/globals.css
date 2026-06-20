@@ -196,8 +196,8 @@ button { color: inherit; }
 .template-art { display: grid; place-items: center; width: 100%; aspect-ratio: .72; max-height: 76px; border: 1px solid #ded6ca; background: #fffdf8; color: #9f8c74; font-family: "Yu Mincho", serif; font-size: 12px; box-shadow: 0 3px 8px rgba(80,65,45,.08); }
 .template-art.watermark { background: radial-gradient(circle, #e9c5bb, #fbf5ed 62%); }
 .template-art.frame { border: 3px double #9eb096; }
-.template-art.scatter { background: radial-gradient(circle at 20% 20%, #d4b6a8 0 8%, transparent 9%), radial-gradient(circle at 80% 68%, #aec0a8 0 8%, transparent 9%), #fffdf8; }
-.template-art.card { aspect-ratio: 1.08; margin-top: 13px; margin-bottom: 12px; border-radius: 4px; background: #f0e8da; }
+.template-art.point { background: radial-gradient(circle at 78% 76%, #d4b6a8 0 14%, transparent 15%), #fffdf8; }
+.template-art.note { background: repeating-linear-gradient(90deg, transparent 0 15px, rgba(183,170,152,.55) 16px 17px, transparent 18px 34px), #fffdf8; }
 .template strong { font-size: 9px; white-space: nowrap; }
 .template small { display: none; }
 
@@ -261,11 +261,12 @@ button { color: inherit; }
 .scatter-shape.stamp span { border-style: dashed; border-radius: 6px; }
 .scatter-count-heading { margin: 14px 0 7px; display: flex; justify-content: space-between; align-items: center; font-family: "Yu Mincho", serif; font-size: 11px; }
 .scatter-count-heading small { color: var(--muted); font-family: sans-serif; font-size: 8px; }
-.scatter-count-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.scatter-count-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .scatter-count { padding: 8px 4px; display: grid; gap: 2px; border: 1px solid var(--line); border-radius: 9px; background: #fffdfa; cursor: pointer; }
 .scatter-count:hover, .scatter-count.selected { border-color: #91a38b; background: #f2f6ef; }
 .scatter-count b { color: var(--ink); font-family: "Yu Mincho", serif; font-size: 10px; font-weight: 600; }
 .scatter-count span { color: var(--muted); font-size: 8px; }
+.onepoint-opacity { margin-top: 12px; }
 
 .line-section { margin-top: 15px; padding-top: 13px; border-top: 1px solid var(--line); }
 .line-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-family: "Yu Mincho", serif; font-size: 11px; }
@@ -373,7 +374,6 @@ footer strong { color: var(--green); letter-spacing: .1em; }
   .template-grid { gap: 4px; }
   .template { padding: 5px 2px 7px; }
   .template-art { max-height: 80px; }
-  .template-art.card { margin-top: 14px; margin-bottom: 13px; }
   .template strong { font-size: 8px; }
   .frame-grid { width: 100%; min-width: 0; display: flex; gap: 5px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: thin; }
   .frame-choice { flex: 0 0 58px; }

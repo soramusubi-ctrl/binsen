@@ -1,4 +1,4 @@
-export type TemplateId = "watermark" | "frame" | "scatter" | "card";
+export type TemplateId = "watermark" | "frame" | "point" | "note";
 export type FrameId =
   | "leaves"
   | "flowers"
@@ -13,8 +13,8 @@ export type FrameId =
   | "waterblue";
 export type LineStyleId = "none" | "solid" | "dashed" | "double" | "handdrawn" | "dots";
 export type ScatterShapeId = "square" | "circle" | "oval" | "cloud" | "stamp";
-export type ScatterCount = 3 | 5 | 8;
 export type WatercolorFrameColorId = "blue" | "green" | "pink" | "brown" | "violet";
+export type OnePointPositionId = "bottom-right" | "top-left" | "bottom-center" | "watermark";
 
 export type EditorSettings = {
   brightness: number;
@@ -27,7 +27,8 @@ export type EditorSettings = {
   lineStyle: LineStyleId;
   watermarkOpacity: number;
   scatterShape: ScatterShapeId;
-  scatterCount: ScatterCount;
+  onePointPosition: OnePointPositionId;
+  onePointOpacity: number;
   message: string;
   frame: FrameId;
   watercolorFrameColor: WatercolorFrameColorId;
@@ -38,6 +39,8 @@ export const PIECE_WIDTH = 1240;
 export const PIECE_HEIGHT = 1754;
 export const A4_WIDTH = 2480;
 export const A4_HEIGHT = 3508;
+export const NOTE_WIDTH = A4_WIDTH / 2;
+export const NOTE_HEIGHT = A4_HEIGHT / 4;
 
 const ink = "#73675a";
 const paleInk = "#b7aa98";
@@ -323,22 +326,27 @@ function drawScatterSource(
   ctx.restore();
 }
 
-const scatterPlacements: Array<{
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  alpha: number;
-}> = [
-  { x: 790, y: 65, width: 380, height: 330, alpha: 0.82 },
-  { x: 42, y: 1260, width: 310, height: 410, alpha: 0.64 },
-  { x: 940, y: 1375, width: 225, height: 245, alpha: 0.5 },
-  { x: 72, y: 80, width: 210, height: 185, alpha: 0.48 },
-  { x: 1020, y: 705, width: 150, height: 135, alpha: 0.38 },
-  { x: 50, y: 760, width: 145, height: 130, alpha: 0.34 },
-  { x: 525, y: 1485, width: 180, height: 155, alpha: 0.34 },
-  { x: 475, y: 90, width: 165, height: 145, alpha: 0.3 },
-];
+function getOnePointBounds(position: OnePointPositionId) {
+  if (position === "top-left") return { x: 86, y: 98, width: 320, height: 300 };
+  if (position === "bottom-center") return { x: 420, y: 1285, width: 400, height: 330 };
+  return { x: 820, y: 1290, width: 330, height: 330 };
+}
+
+function drawOnePointArtwork(
+  ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement | null,
+  settings: EditorSettings,
+) {
+  const opacity = settings.onePointOpacity / 100;
+  if (settings.onePointPosition === "watermark") {
+    drawSource(ctx, image, 0, 0, PIECE_WIDTH, PIECE_HEIGHT, settings, opacity * 0.64);
+    ctx.fillStyle = "rgba(255,255,255,.66)";
+    ctx.fillRect(0, 0, PIECE_WIDTH, PIECE_HEIGHT);
+    return;
+  }
+  const bounds = getOnePointBounds(settings.onePointPosition);
+  drawScatterSource(ctx, image, bounds.x, bounds.y, bounds.width, bounds.height, settings, opacity);
+}
 
 function drawLines(
   ctx: CanvasRenderingContext2D,
@@ -378,6 +386,52 @@ function drawLines(
         ctx.beginPath();
         ctx.moveTo(x, y + 7);
         ctx.lineTo(x + width, y + 7);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.restore();
+}
+
+function drawVerticalLines(
+  ctx: CanvasRenderingContext2D,
+  startX: number,
+  y: number,
+  height: number,
+  count: number,
+  gap: number,
+  style: LineStyleId,
+) {
+  if (style === "none") return;
+  ctx.save();
+  ctx.strokeStyle = paleInk;
+  ctx.lineWidth = 2;
+  if (style === "dashed") ctx.setLineDash([18, 14]);
+  if (style === "dots") {
+    ctx.lineWidth = 4;
+    ctx.lineCap = "round";
+    ctx.setLineDash([1, 18]);
+  }
+  for (let i = 0; i < count; i += 1) {
+    const x = startX - i * gap;
+    if (style === "handdrawn") {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      for (let segment = 1; segment <= 10; segment += 1) {
+        const py = y + (height * segment) / 10;
+        const px = x + Math.sin(segment * 1.7 + i) * 2.2;
+        ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x, y + height);
+      ctx.stroke();
+      if (style === "double") {
+        ctx.beginPath();
+        ctx.moveTo(x - 7, y);
+        ctx.lineTo(x - 7, y + height);
         ctx.stroke();
       }
     }
@@ -699,36 +753,26 @@ function drawFramePreset(
   ctx.restore();
 }
 
-function drawCardBotanicalCorner(
+function getNotePointBounds(position: OnePointPositionId) {
+  if (position === "top-left") return { x: 54, y: 54, width: 190, height: 170 };
+  if (position === "bottom-center") return { x: 455, y: 660, width: 285, height: 150 };
+  return { x: 930, y: 610, width: 210, height: 195 };
+}
+
+function drawNoteOnePointArtwork(
   ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  flipX = false,
-  flipY = false,
+  image: HTMLImageElement | null,
+  settings: EditorSettings,
 ) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(flipX ? -1 : 1, flipY ? -1 : 1);
-  ctx.globalAlpha = 0.78;
-  ctx.strokeStyle = "#809478";
-  ctx.fillStyle = "#9caf91";
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.moveTo(0, 125);
-  ctx.quadraticCurveTo(42, 58, 115, 0);
-  ctx.stroke();
-  [[28, 88, -0.5], [54, 58, 0.55], [84, 30, -0.5]].forEach(([lx, ly, angle]) => {
-    ctx.save();
-    ctx.translate(lx, ly);
-    ctx.rotate(angle);
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 27, 10, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  });
-  drawTinyFlower(ctx, 42, 78, "#e2a9aa", 13);
-  drawTinyFlower(ctx, 92, 20, "#e7c27b", 10);
-  ctx.restore();
+  const opacity = settings.onePointOpacity / 100;
+  if (settings.onePointPosition === "watermark") {
+    drawSource(ctx, image, 0, 0, NOTE_WIDTH, NOTE_HEIGHT, settings, opacity * 0.45);
+    ctx.fillStyle = "rgba(255,255,255,.72)";
+    ctx.fillRect(0, 0, NOTE_WIDTH, NOTE_HEIGHT);
+    return;
+  }
+  const bounds = getNotePointBounds(settings.onePointPosition);
+  drawScatterSource(ctx, image, bounds.x, bounds.y, bounds.width, bounds.height, settings, opacity * 0.88);
 }
 
 export function renderPiece(
@@ -787,46 +831,43 @@ export function renderPiece(
     drawMessage(ctx, settings.message, 145, 545, 950);
   }
 
-  if (template === "scatter") {
-    scatterPlacements.slice(0, settings.scatterCount).forEach((placement) => {
-      drawScatterSource(
-        ctx,
-        image,
-        placement.x,
-        placement.y,
-        placement.width,
-        placement.height,
-        settings,
-        placement.alpha,
-      );
-    });
+  if (template === "point") {
+    drawOnePointArtwork(ctx, image, settings);
     if (settings.lineStyle !== "none") drawLines(ctx, 145, 300, 900, 11, 105, settings.lineStyle);
     drawMessage(ctx, settings.message, 145, 210, 900);
-  }
-
-  if (template === "card") {
-    ctx.strokeStyle = "#9eae98";
-    ctx.lineWidth = 3;
-    roundedRect(ctx, 76, 278, PIECE_WIDTH - 152, 1195, 24);
-    ctx.stroke();
-    ctx.strokeStyle = "#e2d9ca";
-    ctx.lineWidth = 1.5;
-    roundedRect(ctx, 91, 293, PIECE_WIDTH - 182, 1165, 18);
-    ctx.stroke();
-    drawCardBotanicalCorner(ctx, 92, 296);
-    drawCardBotanicalCorner(ctx, PIECE_WIDTH - 92, 1455, true, true);
-    drawSource(ctx, image, 135, 350, PIECE_WIDTH - 270, 660, settings, 0.9);
-    const cardFade = ctx.createLinearGradient(0, 850, 0, 1080);
-    cardFade.addColorStop(0, "rgba(255,255,255,0)");
-    cardFade.addColorStop(1, "#ffffff");
-    ctx.fillStyle = cardFade;
-    ctx.fillRect(125, 850, PIECE_WIDTH - 250, 240);
-    drawMessage(ctx, settings.message, 180, 1080, PIECE_WIDTH - 360);
   }
 
   ctx.strokeStyle = "rgba(130,116,97,.16)";
   ctx.lineWidth = 2;
   ctx.strokeRect(1, 1, PIECE_WIDTH - 2, PIECE_HEIGHT - 2);
+}
+
+export function renderNotePiece(
+  canvas: HTMLCanvasElement,
+  image: HTMLImageElement | null,
+  settings: EditorSettings,
+  scale = 1,
+) {
+  canvas.width = Math.round(NOTE_WIDTH * scale);
+  canvas.height = Math.round(NOTE_HEIGHT * scale);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  ctx.scale(scale, scale);
+  ctx.fillStyle = paper;
+  ctx.fillRect(0, 0, NOTE_WIDTH, NOTE_HEIGHT);
+
+  drawNoteOnePointArtwork(ctx, image, settings);
+
+  ctx.strokeStyle = "rgba(130,116,97,.18)";
+  ctx.lineWidth = 2;
+  roundedRect(ctx, 48, 42, NOTE_WIDTH - 96, NOTE_HEIGHT - 84, 20);
+  ctx.stroke();
+  drawVerticalLines(ctx, NOTE_WIDTH - 165, 112, NOTE_HEIGHT - 224, 9, 92, settings.lineStyle);
+  drawMessage(ctx, settings.message, 72, 62, 420);
+
+  ctx.strokeStyle = "rgba(130,116,97,.16)";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(1, 1, NOTE_WIDTH - 2, NOTE_HEIGHT - 2);
 }
 
 export function renderArtworkPreview(
@@ -862,6 +903,36 @@ export function renderA4(
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   const piece = document.createElement("canvas");
+
+  if (template === "note") {
+    renderNotePiece(piece, image, settings);
+    for (let row = 0; row < 4; row += 1) {
+      for (let col = 0; col < 2; col += 1) {
+        ctx.drawImage(
+          piece,
+          col * NOTE_WIDTH * scale,
+          row * NOTE_HEIGHT * scale,
+          NOTE_WIDTH * scale,
+          NOTE_HEIGHT * scale,
+        );
+      }
+    }
+    ctx.save();
+    ctx.strokeStyle = "rgba(120,112,100,.42)";
+    ctx.lineWidth = Math.max(1, 2 * scale);
+    ctx.setLineDash([14 * scale, 12 * scale]);
+    ctx.beginPath();
+    ctx.moveTo(NOTE_WIDTH * scale, 0);
+    ctx.lineTo(NOTE_WIDTH * scale, A4_HEIGHT * scale);
+    for (let row = 1; row < 4; row += 1) {
+      ctx.moveTo(0, row * NOTE_HEIGHT * scale);
+      ctx.lineTo(A4_WIDTH * scale, row * NOTE_HEIGHT * scale);
+    }
+    ctx.stroke();
+    ctx.restore();
+    return;
+  }
+
   renderPiece(piece, template, image, settings);
   const positions = [
     [0, 0],
